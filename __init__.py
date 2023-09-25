@@ -30,7 +30,6 @@ def run_command(command):
 
 def detect_copy_engine():
 	if os_name == "Linux":
-
 		try:
 			graphical_backend = os.environ["XDG_SESSION_TYPE"]
 		except KeyError:
@@ -43,16 +42,15 @@ def detect_copy_engine():
 					return "xclip"
 				else:
 					raise exceptions.EngineError(f"Xclip gives unknown error:\n\n{check_run.stderr.decode('utf-8')}")
-
 			elif check_binary_installed("xsel"):
 				check_run = subprocess.run("xsel", shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				if check_run.returncode == 0:
 					return "xsel"
 				else:
 					raise exceptions.EngineError(f"Xsel gives unknown error:\n\n{check_run.stderr.decode('utf-8')}")
-
 			else:
 				raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xclip\" or \"xsel\" via your system package manager.")
+		
 		elif graphical_backend == "wayland":
 			if check_binary_installed("wl-paste"):
 				check_run = subprocess.run("wl-paste", shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -69,14 +67,34 @@ def detect_copy_engine():
 		# If there was a command execution error, xclip, xsel and wl-clipboard is not installed
 		raise exceptions.NoEnginesFoundError(f"The graphical backend (X11, Wayland) was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also note that TTY is unsupported\n\nXDG_SESSION_TYPE content: {graphical_backend}")
 
+	elif os_name == "Android":
+		if check_binary_installed("termux-clipboard-get"):
+			try:
+				check_run = subprocess.run("termux-clipboard-get", timeout=5, shell=True, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+				if check_run.returncode == 0:
+					return "termux-clipboard-get"
+				else:
+					raise exceptions.EngineError(f"termux-clipboard-get gives unknown error:\n\n{check_run.stderr.decode('utf-8')}")
+			except subprocess.TimeoutExpired:
+				raise exceptions.NoEnginesFoundError("Usable clipboard engines not found on your system. \"termux-clipboard-get\" finished with timeout, so that means Termux:API plug-in is not installed. Please install it from F-Droid and try again.")
+		else:
+			raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
+
 def paste():
 	print("used engine: " + engine)
+	# - = LINUX - = - = - = - = - = - = - =
 	if engine == "xclip":
 		return run_command("xclip -selection c -o")
-	elif engine == "xsel":
+	if engine == "xsel":
 		return run_command("xsel")
-	elif engine == "wl-paste":
+	if engine == "wl-paste":
 		return run_command("wl-paste")
+	# - = - = - = - = - = - = - = - = - = -
+	# - = Android = - = - = - = - = - = - =
+	if engine == "termux-clipboard-get":
+		return run_command("termux-clipboard-get")
+	# - = - = - = - = - = - = - = - = - = -
+
 
 os_name = detect_os()
 engine = detect_copy_engine()
