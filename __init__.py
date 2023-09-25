@@ -80,6 +80,8 @@ def detect_copy_engine():
 		else:
 			raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
 
+	raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. Maybe your OS is unsupported?")
+
 def paste():
 	print("used engine: " + engine)
 	# - = LINUX - = - = - = - = - = - = - =
