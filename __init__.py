@@ -40,7 +40,7 @@ def check_run_command(command, engine):
 		run_command(command)
 	except exceptions.EngineTimeoutExpired as e:
 		raise exceptions.EngineTimeoutExpired from e
-	except exceptions.BaseException as e:
+	except exceptions.ClipmanBaseException as e:
 		raise exceptions.EngineError(f"\"{command}\" gives unknown error. See output for above.") from e
 	return engine
 
@@ -66,18 +66,16 @@ def detect_copy_engine():
 		if graphical_backend == "x11":
 			if check_binary_installed("xclip"):
 				return check_run_command("xclip -selection c -o", "xclip")
-			elif check_binary_installed("xsel"):
+			if check_binary_installed("xsel"):
 				return check_run_command("xsel", "xsel")
-			else:
-				raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xclip\" or \"xsel\" via your system package manager.")
+			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xclip\" or \"xsel\" via your system package manager.")
 
-		elif graphical_backend == "wayland":
+		if graphical_backend == "wayland":
 			if check_binary_installed("wl-paste"):
 				return check_run_command("wl-paste", "wl-paste")
-			else:
-				raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager.")
+			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager.")
 
-		elif graphical_backend == "tty":
+		if graphical_backend == "tty":
 			raise exceptions.UnsupportedError("Clipboard in TTY is unsupported.")
 
 		# If graphical_backend is unknown
@@ -87,19 +85,23 @@ def detect_copy_engine():
 		if check_binary_installed("termux-clipboard-get"):
 			try:
 				return check_run_command("termux-clipboard-get", "termux-clipboard-get")
-			except exceptions.EngineTimeoutExpired:
-				raise exceptions.NoEnginesFoundError("No usable clipboard engines found on your system. \"termux-clipboard-get\" finished with timeout, so that means Termux:API plug-in is not installed. Please install it from F-Droid and try again.")
+			except exceptions.EngineTimeoutExpired as e:
+				raise exceptions.NoEnginesFoundError("No usable clipboard engines found on your system. \"termux-clipboard-get\" finished with timeout, so that means Termux:API plug-in is not installed. Please install it from F-Droid and try again.") from e
 		else:
-			raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
+			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 	if os_name == "Windows":
-		from . import windows
+		from . import windows # pylint: disable=C0415 # import-outside-toplevel
 		dataclass.windows_native_backend = windows.WindowsClipboard()
 		return "windows_native_backend"
 
-	raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. Maybe your OS is unsupported?")
+	raise exceptions.UnsupportedError(f"Clipboard engines not found on your system. Seems like \"{os_name}\" is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
 
 def paste():
+	"""
+	Returns clipboard content as DECODED string.
+	If there is a picture or copied file(in windows), it returns empty string
+	"""
 	# - = LINUX - = - = - = - = - = - = - =
 	if engine == "xclip":
 		return run_command("xclip -selection c -o")
@@ -116,7 +118,7 @@ def paste():
 	if engine == "windows_native_backend":
 		return dataclass.windows_native_backend.paste()
 	# - = - = - = - = - = - = - = - = - = -
+	raise exceptions.UnknownError("Specified engine not found. Have you set it manually?? ]:<")
 
-debug = False
 os_name = detect_os()
 engine = detect_copy_engine()

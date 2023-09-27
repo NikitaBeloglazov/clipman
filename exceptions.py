@@ -1,16 +1,18 @@
 
-class BaseException(Exception):
+class ClipmanBaseException(Exception):
 	""" Used for catch all exceptions in module """
-	pass
 
-class UnsupportedError(BaseException):
-	pass
+class UnsupportedError(ClipmanBaseException):
+	""" Called if OS or graphical backend is unsupported """
 
-class NoEnginesFoundError(BaseException):
-	pass
+class NoEnginesFoundError(ClipmanBaseException):
+	""" If usable clipboard engines not found on target OS """
 
-class EngineError(BaseException):
-	pass
+class EngineError(ClipmanBaseException):
+	""" If there is an error raised by clipboard engine """
 
-class EngineTimeoutExpired(BaseException):
-	pass
+class EngineTimeoutExpired(ClipmanBaseException):
+	""" Called if clipboard engine calling times out. Mostly made for termux-clipboard-get """
+
+class UnknownError(ClipmanBaseException):
+	""" No comments """
