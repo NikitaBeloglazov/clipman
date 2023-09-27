@@ -1,9 +1,16 @@
 
-class UnsupportedError(Exception):
+class BaseException(Exception):
+	""" Used for catch all exceptions in module """
 	pass
 
-class NoEnginesFoundError(Exception):
+class UnsupportedError(BaseException):
 	pass
 
-class EngineError(Exception):
+class NoEnginesFoundError(BaseException):
+	pass
+
+class EngineError(BaseException):
+	pass
+
+class EngineTimeoutExpired(BaseException):
 	pass

@@ -1,7 +1,7 @@
+# pylint: disable-all
 """
-
 This piece of code was taken from Pypeclip and essentially rewritten to use classes normally,
-the old code was really terrible (function within a function? SERIOUSLY?!?!?!)
+the old code was really terrible (function in a function? SERIOUSLY?!?!?!)
 
 LINK: https://github.com/asweigart/pyperclip/blob/master/src/pyperclip/__init__.py#L350
 
