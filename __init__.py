@@ -28,6 +28,13 @@ def run_command(command):
 
 	return runner.stdout.decode("UTF-8").removesuffix("\n") # looks like all commands returns \n in the end
 
+class DataClass():
+	""" Just shared memory """
+	def __init__(self):
+		self.windows_native_backend = None
+
+dataclass = DataClass()
+
 def detect_copy_engine():
 	if os_name == "Linux":
 		try:
@@ -80,7 +87,12 @@ def detect_copy_engine():
 		else:
 			raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
 
-	raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. Maybe your OS is unsupported?")
+	elif os_name == "Windows":
+		from . import windows
+		dataclass.windows_native_backend = windows.WindowsClipboard()
+		return "windows_native_backend"
+
+	#raise exceptions.NoEnginesFoundError(f"Clipboard engines not found on your system. Maybe your OS is unsupported?")
 
 def paste():
 	print("used engine: " + engine)
@@ -95,6 +107,10 @@ def paste():
 	# - = Android = - = - = - = - = - = - =
 	if engine == "termux-clipboard-get":
 		return run_command("termux-clipboard-get")
+	# - = - = - = - = - = - = - = - = - = -
+	# - = Android = - = - = - = - = - = - =
+	if engine == "windows_native_backend":
+		return dataclass.windows_native_backend.paste()
 	# - = - = - = - = - = - = - = - = - = -
 
 

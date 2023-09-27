@@ -1,155 +1,171 @@
+"""
+
+This piece of code was taken from Pypeclip and essentially rewritten to use classes normally,
+the old code was really terrible (function within a function? SERIOUSLY?!?!?!)
+
+LINK: https://github.com/asweigart/pyperclip/blob/master/src/pyperclip/__init__.py#L350
+
+- = -
+
+[!!] I AM (@NikitaBeloglazov) NOT RESPONSIBLE FOR THIS PIECE OF CODE.
+
+This functionality is provided as-is. 
+If problems arise, for example, with encoding, God and your own hands will help.
+Pull requests are always open. Amen. xD
+
+"""
 import contextlib
 import ctypes
+import time
 from ctypes import c_size_t, sizeof, c_wchar_p, get_errno, c_wchar
+from ctypes.wintypes import (HGLOBAL, LPVOID, DWORD, LPCSTR, INT, HWND, HINSTANCE, HMENU, BOOL, UINT, HANDLE)
+from . import exceptions
 
-# Windows-related clipboard functions:
 class CheckedCall(object):
-    def __init__(self, f):
-        super(CheckedCall, self).__setattr__("f", f)
+	def __init__(self, f):
+		super(CheckedCall, self).__setattr__("f", f)
 
-    def __call__(self, *args):
-        ret = self.f(*args)
-        if not ret and get_errno():
-            raise PyperclipWindowsException("Error calling " + self.f.__name__)
-        return ret
+	def __call__(self, *args):
+		ret = self.f(*args)
+		if not ret and get_errno():
+			raise exceptions.EngineError("WindowsError: Error calling " + self.f.__name__)
+		return ret
 
-    def __setattr__(self, key, value):
-        setattr(self.f, key, value)
+	def __setattr__(self, key, value):
+		setattr(self.f, key, value)
 
 
-def init_windows_clipboard():
-    global HGLOBAL, LPVOID, DWORD, LPCSTR, INT, HWND, HINSTANCE, HMENU, BOOL, UINT, HANDLE
-    from ctypes.wintypes import (HGLOBAL, LPVOID, DWORD, LPCSTR, INT, HWND,
-                                 HINSTANCE, HMENU, BOOL, UINT, HANDLE)
+class WindowsClipboard():
+	def __init__(self):
+		windll = ctypes.windll
+		msvcrt = ctypes.CDLL('msvcrt')
 
-    windll = ctypes.windll
-    msvcrt = ctypes.CDLL('msvcrt')
+		self.safeCreateWindowExA = CheckedCall(windll.user32.CreateWindowExA)
+		self.safeCreateWindowExA.argtypes = [DWORD, LPCSTR, LPCSTR, DWORD, INT, INT,
+										INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
+		self.safeCreateWindowExA.restype = HWND
 
-    safeCreateWindowExA = CheckedCall(windll.user32.CreateWindowExA)
-    safeCreateWindowExA.argtypes = [DWORD, LPCSTR, LPCSTR, DWORD, INT, INT,
-                                    INT, INT, HWND, HMENU, HINSTANCE, LPVOID]
-    safeCreateWindowExA.restype = HWND
+		self.safeDestroyWindow = CheckedCall(windll.user32.DestroyWindow)
+		self.safeDestroyWindow.argtypes = [HWND]
+		self.safeDestroyWindow.restype = BOOL
 
-    safeDestroyWindow = CheckedCall(windll.user32.DestroyWindow)
-    safeDestroyWindow.argtypes = [HWND]
-    safeDestroyWindow.restype = BOOL
+		self.OpenClipboard = windll.user32.OpenClipboard
+		self.OpenClipboard.argtypes = [HWND]
+		self.OpenClipboard.restype = BOOL
 
-    OpenClipboard = windll.user32.OpenClipboard
-    OpenClipboard.argtypes = [HWND]
-    OpenClipboard.restype = BOOL
+		self.safeCloseClipboard = CheckedCall(windll.user32.CloseClipboard)
+		self.safeCloseClipboard.argtypes = []
+		self.safeCloseClipboard.restype = BOOL
 
-    safeCloseClipboard = CheckedCall(windll.user32.CloseClipboard)
-    safeCloseClipboard.argtypes = []
-    safeCloseClipboard.restype = BOOL
+		self.safeEmptyClipboard = CheckedCall(windll.user32.EmptyClipboard)
+		self.safeEmptyClipboard.argtypes = []
+		self.safeEmptyClipboard.restype = BOOL
 
-    safeEmptyClipboard = CheckedCall(windll.user32.EmptyClipboard)
-    safeEmptyClipboard.argtypes = []
-    safeEmptyClipboard.restype = BOOL
+		self.safeGetClipboardData = CheckedCall(windll.user32.GetClipboardData)
+		self.safeGetClipboardData.argtypes = [UINT]
+		self.safeGetClipboardData.restype = HANDLE
 
-    safeGetClipboardData = CheckedCall(windll.user32.GetClipboardData)
-    safeGetClipboardData.argtypes = [UINT]
-    safeGetClipboardData.restype = HANDLE
+		self.safeSetClipboardData = CheckedCall(windll.user32.SetClipboardData)
+		self.safeSetClipboardData.argtypes = [UINT, HANDLE]
+		self.safeSetClipboardData.restype = HANDLE
 
-    safeSetClipboardData = CheckedCall(windll.user32.SetClipboardData)
-    safeSetClipboardData.argtypes = [UINT, HANDLE]
-    safeSetClipboardData.restype = HANDLE
+		self.safeGlobalAlloc = CheckedCall(windll.kernel32.GlobalAlloc)
+		self.safeGlobalAlloc.argtypes = [UINT, c_size_t]
+		self.safeGlobalAlloc.restype = HGLOBAL
 
-    safeGlobalAlloc = CheckedCall(windll.kernel32.GlobalAlloc)
-    safeGlobalAlloc.argtypes = [UINT, c_size_t]
-    safeGlobalAlloc.restype = HGLOBAL
+		self.safeGlobalLock = CheckedCall(windll.kernel32.GlobalLock)
+		self.safeGlobalLock.argtypes = [HGLOBAL]
+		self.safeGlobalLock.restype = LPVOID
 
-    safeGlobalLock = CheckedCall(windll.kernel32.GlobalLock)
-    safeGlobalLock.argtypes = [HGLOBAL]
-    safeGlobalLock.restype = LPVOID
+		self.safeGlobalUnlock = CheckedCall(windll.kernel32.GlobalUnlock)
+		self.safeGlobalUnlock.argtypes = [HGLOBAL]
+		self.safeGlobalUnlock.restype = BOOL
 
-    safeGlobalUnlock = CheckedCall(windll.kernel32.GlobalUnlock)
-    safeGlobalUnlock.argtypes = [HGLOBAL]
-    safeGlobalUnlock.restype = BOOL
+		self.wcslen = CheckedCall(msvcrt.wcslen)
+		self.wcslen.argtypes = [c_wchar_p]
+		self.wcslen.restype = UINT
 
-    wcslen = CheckedCall(msvcrt.wcslen)
-    wcslen.argtypes = [c_wchar_p]
-    wcslen.restype = UINT
+		self.GMEM_MOVEABLE = 0x0002
+		self.CF_UNICODETEXT = 13
 
-    GMEM_MOVEABLE = 0x0002
-    CF_UNICODETEXT = 13
+	@contextlib.contextmanager
+	def window(self):
+		"""
+		Context that provides a valid Windows hwnd.
+		"""
+		# we really just need the hwnd, so setting "STATIC"
+		# as predefined lpClass is just fine.
+		hwnd = self.safeCreateWindowExA(0, b"STATIC", None, 0, 0, 0, 0, 0,
+								   None, None, None, None)
+		try:
+			yield hwnd
+		finally:
+			self.safeDestroyWindow(hwnd)
 
-    @contextlib.contextmanager
-    def window():
-        """
-        Context that provides a valid Windows hwnd.
-        """
-        # we really just need the hwnd, so setting "STATIC"
-        # as predefined lpClass is just fine.
-        hwnd = safeCreateWindowExA(0, b"STATIC", None, 0, 0, 0, 0, 0,
-                                   None, None, None, None)
-        try:
-            yield hwnd
-        finally:
-            safeDestroyWindow(hwnd)
+	@contextlib.contextmanager
+	def clipboard(self, hwnd):
+		"""
+		Context manager that opens the clipboard and prevents
+		other applications from modifying the clipboard content.
+		"""
+		# We may not get the clipboard handle immediately because
+		# some other application is accessing it (?)
+		# We try for at least 500ms to get the clipboard.
+		t = time.time() + 0.5
+		success = False
+		while time.time() < t:
+			success = self.OpenClipboard(hwnd)
+			if success:
+				break
+			time.sleep(0.01)
+		if not success:
+			raise exceptions.EngineError("WindowsError: Error calling OpenClipboard")
 
-    @contextlib.contextmanager
-    def clipboard(hwnd):
-        """
-        Context manager that opens the clipboard and prevents
-        other applications from modifying the clipboard content.
-        """
-        # We may not get the clipboard handle immediately because
-        # some other application is accessing it (?)
-        # We try for at least 500ms to get the clipboard.
-        t = time.time() + 0.5
-        success = False
-        while time.time() < t:
-            success = OpenClipboard(hwnd)
-            if success:
-                break
-            time.sleep(0.01)
-        if not success:
-            raise PyperclipWindowsException("Error calling OpenClipboard")
+		try:
+			yield
+		finally:
+			self.safeCloseClipboard()
 
-        try:
-            yield
-        finally:
-            safeCloseClipboard()
+	def copy(self, text):
+		"""
+		This function is heavily based on
+		http://msdn.com/ms649016#_win32_Copying_Information_to_the_Clipboard
+		"""
 
-    def copy_windows(text):
-        # This function is heavily based on
-        # http://msdn.com/ms649016#_win32_Copying_Information_to_the_Clipboard
+		text = str(text)
+		#text = _stringifyText(text) # Converts non-str values to str.
 
-        text = _stringifyText(text) # Converts non-str values to str.
+		with self.window() as hwnd:
+			# http://msdn.com/ms649048
+			# If an application calls OpenClipboard with hwnd set to NULL,
+			# EmptyClipboard sets the clipboard owner to NULL;
+			# this causes SetClipboardData to fail.
+			# => We need a valid hwnd to copy something.
+			with self.clipboard(hwnd):
+				self.safeEmptyClipboard()
 
-        with window() as hwnd:
-            # http://msdn.com/ms649048
-            # If an application calls OpenClipboard with hwnd set to NULL,
-            # EmptyClipboard sets the clipboard owner to NULL;
-            # this causes SetClipboardData to fail.
-            # => We need a valid hwnd to copy something.
-            with clipboard(hwnd):
-                safeEmptyClipboard()
+				if text:
+					# http://msdn.com/ms649051
+					# If the hMem parameter identifies a memory object,
+					# the object must have been allocated using the
+					# function with the GMEM_MOVEABLE flag.
+					count = self.wcslen(text) + 1
+					handle = self.safeGlobalAlloc(self.GMEM_MOVEABLE,
+											 count * sizeof(c_wchar))
+					locked_handle = self.safeGlobalLock(handle)
 
-                if text:
-                    # http://msdn.com/ms649051
-                    # If the hMem parameter identifies a memory object,
-                    # the object must have been allocated using the
-                    # function with the GMEM_MOVEABLE flag.
-                    count = wcslen(text) + 1
-                    handle = safeGlobalAlloc(GMEM_MOVEABLE,
-                                             count * sizeof(c_wchar))
-                    locked_handle = safeGlobalLock(handle)
+					ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(text), count * sizeof(c_wchar))
 
-                    ctypes.memmove(c_wchar_p(locked_handle), c_wchar_p(text), count * sizeof(c_wchar))
+					self.safeGlobalUnlock(handle)
+					self.safeSetClipboardData(self.CF_UNICODETEXT, handle)
 
-                    safeGlobalUnlock(handle)
-                    safeSetClipboardData(CF_UNICODETEXT, handle)
-
-    def paste_windows():
-        with clipboard(None):
-            handle = safeGetClipboardData(CF_UNICODETEXT)
-            if not handle:
-                # GetClipboardData may return NULL with errno == NO_ERROR
-                # if the clipboard is empty.
-                # (Also, it may return a handle to an empty buffer,
-                # but technically that's not empty)
-                return ""
-            return c_wchar_p(handle).value
-
-    return copy_windows, paste_windows
+	def paste(self):
+		with self.clipboard(None):
+			handle = self.safeGetClipboardData(self.CF_UNICODETEXT)
+			if not handle:
+				# GetClipboardData may return NULL with errno == NO_ERROR
+				# if the clipboard is empty.
+				# (Also, it may return a handle to an empty buffer,
+				# but technically that's not empty)
+				return ""
+			return c_wchar_p(handle).value
