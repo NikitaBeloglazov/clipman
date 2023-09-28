@@ -1,3 +1,32 @@
+# -*- coding: utf-8 -*-
+"""
+ * Copyright (C) 2023 Nikita Beloglazov <nnikita.beloglazov@gmail.com>
+ *
+ * This file is part of github.com/NikitaBeloglazov/clipman.
+ *
+ * NikitaBeloglazov/clipman is free software; you can redistribute it and/or
+ * modify it under the terms of the Mozilla Public License 2.0
+ * published by the Mozilla Foundation.
+ *
+ * NikitaBeloglazov/clipman is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY.
+ *
+ * You should have received a copy of the Mozilla Public License 2.0
+ * along with NikitaBeloglazov/clipman
+ * If not, see https://mozilla.org/en-US/MPL/2.0.
+
+- = - =
+ * Module Decsription:
+ Module that contain exceptions.
+
+- = - =
+ * Usage:
+ If you want to catch specific error, use name of error, as example:
+ - except exceptions.NoEnginesFoundError:
+
+ If you want to catch all errors, use ClipmanBaseException.
+ - except exceptions.ClipmanBaseException:
+"""
 
 class ClipmanBaseException(Exception):
 	""" Used for catch all exceptions in module """

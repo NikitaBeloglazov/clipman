@@ -1,5 +1,27 @@
+# -*- coding: utf-8 -*-
 # pylint: disable-all
 """
+ * Copyright (C) 2023 Nikita Beloglazov <nnikita.beloglazov@gmail.com>
+ *
+ * This file is part of github.com/NikitaBeloglazov/clipman.
+ *
+ * NikitaBeloglazov/clipman is free software; you can redistribute it and/or
+ * modify it under the terms of the Mozilla Public License 2.0
+ * published by the Mozilla Foundation.
+ *
+ * NikitaBeloglazov/clipman is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY.
+ *
+ * You should have received a copy of the Mozilla Public License 2.0
+ * along with NikitaBeloglazov/clipman
+ * If not, see https://mozilla.org/en-US/MPL/2.0.
+
+- = - =
+ * Module Decsription:
+ Module that is responsible for supporting OS Windows
+
+- = - =
+
 This piece of code was taken from Pypeclip and essentially rewritten to use classes normally,
 the old code was really terrible (function in a function? SERIOUSLY?!?!?!)
 
@@ -13,6 +35,14 @@ This functionality is provided as-is.
 If problems arise, for example, with encoding, God and your own hands will help.
 Pull requests are always open. Amen. xD
 
+- = - =
+ * Usage:
+
+ - from clipman import windows
+ - win = windows.WindowsClipboard() # initialize it
+
+ - win.paste() # returns text in clipboard
+ - win.copy("test text") # puts text in clipboard
 """
 import contextlib
 import ctypes
