@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clipman"
+version = "!!{PLACEHOLDER}!!"
+authors = [
+  {name="NikitaBeloglazov", email="nnikita.beloglazov@gmail.com"},
+]
+description = "Python3 module for working with clipboard. Currently read-only interaction. Created because pyperclip is discontinued."
+readme = "README.md"
+license = {text = "MPL 2.0 License"}
+
+requires-python = ">=3.9"
+dependencies = []
+
+keywords = ["clipman", "clipboard", "copy", "paste", "xclip"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/NikitaBeloglazov/clipman"
+"Bug Tracker" = "https://github.com/NikitaBeloglazov/clipman/issues"
