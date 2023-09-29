@@ -9,14 +9,15 @@ __Python3 module for working with clipboard. Created because pyperclip is discon
 
 __Mostly made for [✨ YTCON](https://github.com/NikitaBeloglazov/ytcon)__
 
-# Features:
-* Simple
+# 📘 Features:
+* Simple use and simple architecture by KISS
+* User-friendly
 * No additional modules
-* User-friendly hints what to do
-* Coded by KISS method
 * Supports many engines
+* We use PyLint and we comment all our code
+* Active development
 
-# Using
+# 👽 Using
 ```python3
 import clipman
 clipman.init() # Just initialize module
@@ -28,12 +29,12 @@ clipman.set("test")
 print(clipman.get())
 Out: 'test'
 ```
-### [!!] Also you can use clipman.copy("ytcon") and clipman.paste() as from pyperclip!:)
-### Catching errors
-* __If you want to catch all errors from the module, use `clipman.exceptions.ClipmanBaseException`:__
+__Also you can use `clipman.copy("ytcon")` and `clipman.paste()` as from pyperclip!:)__
+## Catching errors
+* If you want to catch all errors from the module, use `clipman.exceptions.ClipmanBaseException`:
 ```python3
+import clipman
 try:
-  import clipman
   clipman.init()
   print(clipman.paste())
 except clipman.exceptions.ClipmanBaseException as e:
@@ -41,33 +42,31 @@ except clipman.exceptions.ClipmanBaseException as e:
 ```
 * And if you want to catch specific module error, use its name.
 
-# Install
-#### Clipman is avalible on PyPI - https://pypi.org/project/clipman/
+# 🚀 Install
+### Clipman is avalible on PyPI - https://pypi.org/project/clipman/
 
 ### Install it as pip package
 ```shell
 pip3 install clipman
 ```
 
-## On Linux
-You need install additional deps
+# 📙 Additional deps
+__Unstead zypper you need to use system package manager: apt, dnf, pacman, etc__
 
-(_*unstead zypper you can use any package manager, for example, apt or dnf_)
-### X11
-```shell
-sudo zypper install xclip
-```
-or
-```shell
-sudo zypper install xsel
-```
----
-### Wayland
-```shell
-sudo zypper install wl-clipboard
-```
+`- = - = -`
+### 🐧 On Linux - X11
+- Install `xclip` or `xsel` package
 
-## On Android
+Example: _sudo zypper install xclip_ __OR__ _sudo zypper install xsel_
+
+`- = - = -`
+### 🐧 On Linux - Wayland
+- Install `wl-clipboard` package
+
+Example: _sudo zypper install wl-clipboard_
+
+`- = - = -`
+### 🐸 On Android
 Clipboard works only in Termux.
 And you need install additional deps in it.
 * Install ```Termux:API``` from F-Droid
@@ -75,9 +74,9 @@ And you need install additional deps in it.
 * Check it - run ```termux-clipboard-get```
 
 # Support
-__•‎ 🟩 Linux - FULL SUPPORT, additional deps needed__
+__•‎ 🟩 Linux - FULL SUPPORT, some additional deps needed__
 
-__•‎ 🟩 Android - FULL SUPPORT in Termux, additional deps needed too__
+__•‎ 🟩 Android - FULL SUPPORT in Termux, some additional deps needed too__
 
 __•‎ 🟩 Windows - Works natively__
 
@@ -87,9 +86,10 @@ __•‎ 🟥 MacOS - Unsupported, i don't have a Mac 🤷‍♂️. If you have
 This code is under [Mozilla Public License Version 2.0](/../../blob/main/LICENSE).
 
 # Contribution / Issues
-* __Pull requests are welcome!__
-* Feel free to write Issues! The developer can answer you in the following languages: Ukrainian, English, Russian.
-* __[!!] If you encouter an error, please read the error text very closely.
-  The module is specially written so that errors give you a complete answer even if you a lamer__
+📕 __[!!] If you encouter an error, please read the error text very closely.
+The module is specially written so that errors give you a complete answer even if you a lamer__
+
+* 🥼 __Pull requests are welcome!__
+* 🌈 Feel free to write Issues! The developer can answer you in the following languages: Ukrainian, English, Russian.
 * Don't forget to attach version (`pip3 show clipman`) and error text :)
-* To speed up the process write to [maintainer](https://github.com/NikitaBeloglazov)
+* ⏩ To speed up the process write to [maintainer](https://github.com/NikitaBeloglazov)
