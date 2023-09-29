@@ -22,8 +22,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "Topic :: Software Development :: Libraries :: Python Modules"
-    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
 ]
 
 [project.urls]
