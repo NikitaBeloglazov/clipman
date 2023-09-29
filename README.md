@@ -4,6 +4,7 @@
 [![License: Mozilla Public License 2.0](https://img.shields.io/badge/License:_MPL_2.0-blueviolet?logo=googledocs&logoColor=white&style=for-the-badge)](https://mozilla.org/en-US/MPL/2.0)
 [![linting: pylint](https://img.shields.io/badge/Linting:_pylint-success?logo=azurefunctions&logoColor=white&style=for-the-badge)](https://pylint.pycqa.org/en/latest/)
 [![maintainer: NikitaBeloglazov](https://img.shields.io/badge/Maintainer:_.%E2%80%A2%C2%B0%E2%97%8F%E2%9D%A4%EF%B8%8F%20NikitaBeloglazov%20Software%20Foundation%20%E2%9D%A4%EF%B8%8F%E2%97%8F%C2%B0%E2%80%A2.-informational?logoColor=white&style=for-the-badge&logo=github)](https://github.com/NikitaBeloglazov)
+
 __Python3 module for working with clipboard. Currently read-only interaction.__
 
 __Created because pyperclip is discontinued. Mostly made for [✨ YTCON](https://github.com/NikitaBeloglazov/ytcon)__
@@ -18,15 +19,20 @@ __Created because pyperclip is discontinued. Mostly made for [✨ YTCON](https:/
 # Using
 ```python3
 import clipman
-clipman.paste() # Returns string from clipboard. So simple!:)
+clipman.init() # Initialize module
+clipman.paste() # Get string from clipboard. So simple!:)
 ```
 ### Catching errors
-* __If you want to catch all errors from the module, use `clipman.exceptions.ClipmanBaseException`__
+* __If you want to catch all errors from the module, use `clipman.exceptions.ClipmanBaseException`:__
+```python3
+try:
+  import clipman
+  clipman.init()
+  print(clipman.paste())
+except clipman.exceptions.ClipmanBaseException as e:
+  print(e)
+```
 * And if you want to catch specific module error, use its name.
-<!-- ```python3
-import clipman
-clipman.paste() # Returns string from clipboard. So simple!:)
-``` -->
 
 # Install
 #### clipman is avalible on PyPI 🎆 - https://pypi.org/project/clipman/

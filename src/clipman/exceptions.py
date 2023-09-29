@@ -31,6 +31,12 @@
 class ClipmanBaseException(Exception):
 	""" Used for catch all exceptions in module """
 
+class NoInitializationError(ClipmanBaseException):
+	""" Called if dev don't called clipman.init() """
+	# - = - = - = - = - = - = - ↓ Set default error message ↓
+	def __init__(self, message="Initialization was not been performed or it failed! Call initialization: clipman.init()"):
+		super().__init__(message)
+
 class UnsupportedError(ClipmanBaseException):
 	""" Called if OS or graphical backend is unsupported """
 
