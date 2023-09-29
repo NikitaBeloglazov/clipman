@@ -14,17 +14,6 @@
  * You should have received a copy of the Mozilla Public License 2.0
  * along with NikitaBeloglazov/clipman
  * If not, see https://mozilla.org/en-US/MPL/2.0.
-
-- = - =
- * Module Decsription:
- Main part of module.
-
-- = - =
- * Usage:
-
- - import clipman # import & init
- - clipman.paste() # returns text in clipboard
-
 """
 import os
 import sys
@@ -61,6 +50,7 @@ def run_command(command, timeout=5):
 	return runner.stdout.decode("UTF-8").removesuffix("\n") # looks like all commands returns \n in the end
 
 def run_command_with_paste(command, text):
+	""" Calls binary, gives it the text to be copied, and exits"""
 	with subprocess.Popen(command, stdin=subprocess.PIPE, close_fds=True) as runner:
 		runner.communicate(input=text.encode("UTF-8"))
 
@@ -85,7 +75,7 @@ def check_run_command(command, engine):
 	return engine
 
 class DataClass():
-	""" Just shared memory """
+	""" Class for storing module data """
 	def __init__(self):
 		self.windows_native_backend = None
 		self.os_name = detect_os()
@@ -142,15 +132,14 @@ def detect_clipboard_engine():
 
 def get():
 	"""
-	Returns clipboard content as DECODED string.
+	Gets & returns clipboard content as DECODED string.
 	If there is a picture or copied file(in windows), it returns empty string
 	"""
 	return call("get")
 
 def set(text): # pylint: disable=W0622 # redefined-builtin # i don't care
 	"""
-	Returns clipboard content as DECODED string.
-	If there is a picture or copied file(in windows), it returns empty string
+	Sets text to clipboard
 	"""
 	return call("set", text)
 
@@ -158,15 +147,20 @@ def set(text): # pylint: disable=W0622 # redefined-builtin # i don't care
 paste = get
 copy = set
 
-def call(method, text=None):
+def call(method, text=None): # pylint: disable=R0911 # too-many-return-statements
+	"""
+	General method for calling engines. Very useful for maintenance
+
+	# METHODS:
+	# * set - (copy)  set to clipboard
+	# * get - (paste) get text from clipboard
+	"""
 	if dataclass.init_called is False:
 		raise exceptions.NoInitializationError
 	if method == "set" and text is None:
 		raise exceptions.TextNotSpecified("Not specified text to paste!")
 
-	# METHODS:
-	# * set - copy to clipboard
-	# * get - (paste) get text from clipboard
+	text = str(text)
 
 	# - = LINUX - = - = - = - = - = - = - =
 	if dataclass.engine == "xclip":
