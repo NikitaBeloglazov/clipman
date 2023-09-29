@@ -40,6 +40,9 @@ class NoInitializationError(ClipmanBaseException):
 class UnsupportedError(ClipmanBaseException):
 	""" Called if OS or graphical backend is unsupported """
 
+class TextNotSpecified(ClipmanBaseException):
+	""" Called if call("copy") not specified text to paste """
+
 class NoEnginesFoundError(ClipmanBaseException):
 	""" If usable clipboard engines not found on target OS """
 
