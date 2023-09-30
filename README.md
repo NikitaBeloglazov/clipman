@@ -10,12 +10,13 @@ __Python3 module for working with clipboard. Created because pyperclip is discon
 __Mostly made for [✨ YTCON](https://github.com/NikitaBeloglazov/ytcon)__
 
 # 📘 Features:
-* Simple use and simple architecture by KISS
+* Easy use and simple architecture by KISS
 * User-friendly
 * No additional modules
 * Supports many engines
 * We use PyLint and we comment all our code
 * Active development
+* Just good dev 😇
 
 # 👽 Using
 ```python3
@@ -50,17 +51,28 @@ except clipman.exceptions.ClipmanBaseException as e:
 pip3 install clipman
 ```
 
+# Support
+__•‎ 🟩 Linux - FULL SUPPORT__, some additional deps needed
+
+__•‎ 🟩 Android - FULL SUPPORT in Termux__, some additional deps needed too
+
+__•‎ 🟩 BSD Systems - Works__ on FreeBSD/GhostBSD. Deps needed, same as Linux
+
+__•‎ 🟩 Windows - Works__ natively
+
+__•‎ 🟩 MacOS - Works__ on macOS HighSierra 10.13
+
 # 📙 Additional deps
-__Unstead zypper you need to use system package manager: apt, dnf, pacman, etc__
+__Unstead zypper you need to use system package manager: pkg, apt, dnf, pacman, etc__
 
 `- = - = -`
-### 🐧 On Linux - X11
-- Install `xclip` or `xsel` package
+### 🐧 On Linux/BSD - X11
+- Install `xsel` or `xclip` package
 
-Example: _sudo zypper install xclip_ __OR__ _sudo zypper install xsel_
+Example: _sudo zypper install xsel_ __OR__ _sudo zypper install xclip_
 
 `- = - = -`
-### 🐧 On Linux - Wayland
+### 🐧 On Linux/BSD - Wayland
 - Install `wl-clipboard` package
 
 Example: _sudo zypper install wl-clipboard_
@@ -72,15 +84,6 @@ And you need install additional deps in it.
 * Install ```Termux:API``` from F-Droid
 * Run ```pkg install termux-api```
 * Check it - run ```termux-clipboard-get```
-
-# Support
-__•‎ 🟩 Linux - FULL SUPPORT__, some additional deps needed
-
-__•‎ 🟩 Android - FULL SUPPORT in Termux__, some additional deps needed too
-
-__•‎ 🟩 Windows - Works natively__
-
-__•‎ 🟩 MacOS - Works fine__ on macOS HighSierra 10.13
 
 # License
 This code is under [Mozilla Public License Version 2.0](/../../blob/main/LICENSE).

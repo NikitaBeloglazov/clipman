@@ -51,7 +51,7 @@ def run_command(command, timeout=5):
 		raise exceptions.EngineTimeoutExpired(f"The timeout for executing the command was exceeded: subprocess.TimeoutExpired: {e}")
 
 	if runner.returncode != 0:
-		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stdout.decode('UTF-8')}")
+		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stderr.decode('UTF-8')}")
 
 	return runner.stdout.decode("UTF-8").removesuffix("\n") # looks like all commands returns \n in the end
 
@@ -95,7 +95,7 @@ def detect_clipboard_engine():
 	Detects clipboard engine based on many factors, and in many cases gives the user friendly advice.
 	Returns name of detected engine
 	"""
-	if dataclass.os_name == "Linux":
+	if dataclass.os_name in ("Linux", "FreeBSD"):
 		try:
 			# Detect graphical backend from ENV
 			graphical_backend = os.environ["XDG_SESSION_TYPE"]
@@ -103,11 +103,11 @@ def detect_clipboard_engine():
 			graphical_backend = "< NOT SET >"
 
 		if graphical_backend == "x11":
+			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
+				return check_run_command(['xsel'], "xsel")
 			if check_binary_installed("xclip"):
 				return check_run_command(['xclip', '-selection', 'c', '-o'], "xclip")
-			if check_binary_installed("xsel"):
-				return check_run_command(['xsel'], "xsel")
-			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xclip\" or \"xsel\" via your system package manager.")
+			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xsel\" or \"xclip\" via your system package manager.")
 
 		if graphical_backend == "wayland":
 			if check_binary_installed("wl-paste"):
@@ -175,16 +175,16 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	text = str(text)
 
 	# - = LINUX - = - = - = - = - = - = - =
-	if dataclass.engine == "xclip":
-		if method == "set":
-			return run_command_with_paste(['xclip', '-selection', 'c', '-i'], text)
-		if method == "get":
-			return run_command(['xclip', '-selection', 'c', '-o'])
 	if dataclass.engine == "xsel":
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)
 		if method == "get":
 			return run_command(["xsel"])
+	if dataclass.engine == "xclip":
+		if method == "set":
+			return run_command_with_paste(['xclip', '-selection', 'c', '-i'], text)
+		if method == "get":
+			return run_command(['xclip', '-selection', 'c', '-o'])
 	if dataclass.engine == "wl-clipboard":
 		if method == "set":
 			try:
