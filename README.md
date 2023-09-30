@@ -74,13 +74,13 @@ And you need install additional deps in it.
 * Check it - run ```termux-clipboard-get```
 
 # Support
-__•‎ 🟩 Linux - FULL SUPPORT, some additional deps needed__
+__•‎ 🟩 Linux - FULL SUPPORT__, some additional deps needed
 
-__•‎ 🟩 Android - FULL SUPPORT in Termux, some additional deps needed too__
+__•‎ 🟩 Android - FULL SUPPORT in Termux__, some additional deps needed too
 
 __•‎ 🟩 Windows - Works natively__
 
-__•‎ 🟥 MacOS - Unsupported, i don't have a Mac 🤷‍♂️. If you have it, and you want to help, [write an issue](https://github.com/NikitaBeloglazov/clipman/issues/new)__
+__•‎ 🟩 MacOS - Works fine__ on macOS HighSierra 10.13
 
 # License
 This code is under [Mozilla Public License Version 2.0](/../../blob/main/LICENSE).

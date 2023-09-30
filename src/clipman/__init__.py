@@ -31,9 +31,15 @@ def check_binary_installed(binary_name):
 def detect_os():
 	""" Detects name of OS """
 	os_name = platform.system()
-	if platform.system() == "Linux" and hasattr(sys, "getandroidapilevel"):
+
+	if os_name == "Linux" and hasattr(sys, "getandroidapilevel"):
 		# Detect Android by yourself because platform.system() detects Android as Linux
-		os_name = "Android"
+		return "Android"
+
+	if os_name == "Darwin" and os.path.exists("/Users") and os.path.isdir("/Users"):
+		# Detect macOS by specific directories in root (/)
+		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too
+		return "macOS"
 
 	return os_name
 
@@ -127,6 +133,12 @@ def detect_clipboard_engine():
 		from . import windows # pylint: disable=C0415 # import-outside-toplevel
 		dataclass.windows_native_backend = windows.WindowsClipboard()
 		return "windows_native_backend"
+	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
+	if dataclass.os_name == "macOS":
+		if check_binary_installed("pbpaste"):
+			return check_run_command(['pbpaste'], "pboard")
+		raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For some reason, pbpaste (pboard) is not included in your macOS:((\nPlease make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
+	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 
 	raise exceptions.UnsupportedError(f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
 
@@ -195,6 +207,13 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			return dataclass.windows_native_backend.copy(text)
 		if method == "get":
 			return dataclass.windows_native_backend.paste()
+	# - = - = - = - = - = - = - = - = - = -
+	# - = macOS = - = - = - = - = - = - =
+	if dataclass.engine == "pboard":
+		if method == "set":
+			return run_command_with_paste(['pbcopy'], text)
+		if method == "get":
+			return run_command(['pbpaste'])
 	# - = - = - = - = - = - = - = - = - = -
 	raise exceptions.UnknownError("Specified engine not found. Have you set it manually?? ]:<")
 
