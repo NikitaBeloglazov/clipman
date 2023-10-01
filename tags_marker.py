@@ -1,7 +1,8 @@
 import subprocess
 import os
 
-os.system("ls -a")
+os.system("tree -a")
+os.system("git fetch --tags")
 tag = subprocess.check_output("git describe --tags", shell=True, encoding="UTF-8")
 
 print("[TAG MARKER] git response: " + tag)
