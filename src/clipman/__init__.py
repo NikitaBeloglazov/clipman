@@ -95,7 +95,7 @@ def detect_clipboard_engine():
 	Detects clipboard engine based on many factors, and in many cases gives the user friendly advice.
 	Returns name of detected engine
 	"""
-	if dataclass.os_name in ("Linux", "FreeBSD"):
+	if dataclass.os_name in ("Linux", "FreeBSD", "OpenBSD"):
 		try:
 			# Detect graphical backend from ENV
 			graphical_backend = os.environ["XDG_SESSION_TYPE"]

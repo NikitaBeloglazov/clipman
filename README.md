@@ -56,7 +56,7 @@ __•‎ 🟩 Linux - FULL SUPPORT__, some additional deps needed
 
 __•‎ 🟩 Android - FULL SUPPORT in Termux__, some additional deps needed too
 
-__•‎ 🟩 BSD Systems - Works__ on FreeBSD/GhostBSD. Deps needed, same as Linux
+__•‎ 🟩 BSD Systems - Works__ on __FreeBSD / GhostBSD__ and OpenBSD / FuguIta, deps same as Linux
 
 __•‎ 🟩 Windows - Works__ natively
 
