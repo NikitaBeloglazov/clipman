@@ -104,7 +104,7 @@ def detect_clipboard_engine():
 
 		if graphical_backend == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
-				return check_run_command(['xsel'], "xsel")
+				return check_run_command(['xsel', '-b', '-n', '-o'], "xsel")
 			if check_binary_installed("xclip"):
 				return check_run_command(['xclip', '-selection', 'c', '-o'], "xclip")
 			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xsel\" or \"xclip\" via your system package manager.")
@@ -140,7 +140,7 @@ def detect_clipboard_engine():
 		raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For some reason, pbpaste (pboard) is not included in your macOS:((\nPlease make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 
-	raise exceptions.UnsupportedError(f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
+	raise exceptions.UnsupportedError(f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" OS is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
 
 def get():
 	"""
@@ -179,7 +179,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)
 		if method == "get":
-			return run_command(["xsel"])
+			return run_command(['xsel', '-b', '-n', '-o'])
 	if dataclass.engine == "xclip":
 		if method == "set":
 			return run_command_with_paste(['xclip', '-selection', 'c', '-i'], text)
