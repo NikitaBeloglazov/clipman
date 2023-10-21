@@ -43,7 +43,7 @@ def detect_os():
 
 	return os_name
 
-def run_command(command, timeout=5):
+def run_command(command, timeout=20):
 	""" Binary file caller """
 	try:
 		runner = subprocess.run(command, timeout=timeout, shell=False, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -188,7 +188,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	if dataclass.engine == "wl-clipboard":
 		if method == "set":
 			try:
-				return run_command(['wl-copy', text], timeout=3)
+				return run_command(['wl-copy', text], timeout=7)
 			except exceptions.EngineTimeoutExpired:
 				return None # SEEMS like its okay, wl-copy for some reason remains in background
 		if method == "get":
