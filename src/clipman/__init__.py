@@ -43,7 +43,7 @@ def detect_os():
 
 	return os_name
 
-def run_command(command, timeout=20):
+def run_command(command, timeout=20, features=()):
 	""" Binary file caller """
 	try:
 		runner = subprocess.run(command, timeout=timeout, shell=False, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -51,6 +51,15 @@ def run_command(command, timeout=20):
 		raise exceptions.EngineTimeoutExpired(f"The timeout for executing the command was exceeded: subprocess.TimeoutExpired: {e}")
 
 	if runner.returncode != 0:
+		# - = - = - = - = - = - = - = - = - = - = - = - = - =
+		# Workaround: if nothing is copied, wl-clipboard returns error code 1 with message "Nothing is copied"
+
+		# We catch these moments and return an empty string
+		# because by default in clipman, if there is nothing copied, we need to return an empty string
+		if "wl-clipboard_nothing_is_copied_is_ok" in features:
+			if runner.stderr.decode('UTF-8') == "Nothing is copied\n":
+				return ""
+		# - = - = - = - = - = - = - = - = - = - = - = - = - =
 		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stderr.decode('UTF-8')}")
 
 	return runner.stdout.decode("UTF-8").removesuffix("\n") # looks like all commands returns \n in the end
@@ -67,13 +76,13 @@ def run_command_with_paste(command, text):
 		#time.sleep(0.2)
 		#runner.kill()
 
-def check_run_command(command, engine):
+def check_run_command(command, engine, features=()):
 	"""
 	command - command to check run
 	engine - string that will be returned if check is succeful
 	"""
 	try:
-		run_command(command)
+		run_command(command, features=features)
 	except exceptions.EngineTimeoutExpired as e:
 		raise exceptions.EngineTimeoutExpired from e
 	except exceptions.ClipmanBaseException as e:
@@ -107,12 +116,12 @@ def detect_clipboard_engine():
 			graphical_backend = "< NOT SET >"
 
 		try:
-			import dbus
+			import dbus # pylint: disable=import-outside-toplevel
 			bus = dbus.SessionBus()
 			dataclass.klipper = dbus.Interface(bus.get_object("org.kde.klipper", "/klipper"), "org.kde.klipper.klipper")
-
 			dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
 
+			# If call to klipper do not raise errors, everything is OK
 			return 'org.kde.klipper'
 		except:
 			pass
@@ -126,7 +135,7 @@ def detect_clipboard_engine():
 
 		if graphical_backend == "wayland":
 			if check_binary_installed("wl-paste"):
-				return check_run_command(['wl-paste'], "wl-clipboard")
+				return check_run_command(['wl-paste'], "wl-clipboard", features=("wl-clipboard_nothing_is_copied_is_ok",))
 			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager.")
 
 		if graphical_backend == "tty":
@@ -212,7 +221,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			except exceptions.EngineTimeoutExpired:
 				return None # SEEMS like its okay, wl-copy for some reason remains in background
 		if method == "get":
-			return run_command(['wl-paste'])
+			return run_command(['wl-paste'], features=("wl-clipboard_nothing_is_copied_is_ok",))
 	# - = - = - = - = - = - = - = - = - = -
 	# - = Android = - = - = - = - = - = - =
 	if dataclass.engine == "termux-clipboard":
