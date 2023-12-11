@@ -83,7 +83,11 @@ def check_run_command(command, engine):
 class DataClass():
 	""" Class for storing module data """
 	def __init__(self):
+		# - =
+		self.klipper = None
 		self.windows_native_backend = None
+		# - =
+
 		self.os_name = detect_os()
 		self.engine = None
 		self.init_called = False
@@ -101,6 +105,17 @@ def detect_clipboard_engine():
 			graphical_backend = os.environ["XDG_SESSION_TYPE"]
 		except KeyError:
 			graphical_backend = "< NOT SET >"
+
+		try:
+			import dbus
+			bus = dbus.SessionBus()
+			dataclass.klipper = dbus.Interface(bus.get_object("org.kde.klipper", "/klipper"), "org.kde.klipper.klipper")
+
+			dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
+
+			return 'org.kde.klipper'
+		except:
+			pass
 
 		if graphical_backend == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
@@ -175,6 +190,11 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	text = str(text)
 
 	# - = LINUX - = - = - = - = - = - = - =
+	if dataclass.engine == "org.kde.klipper":
+		if method == "set":
+			return dataclass.klipper.setClipboardContents(text, dbus_interface="org.kde.klipper.klipper")
+		if method == "get":
+			return str(dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper"))
 	if dataclass.engine == "xsel":
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)
