@@ -216,10 +216,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			return run_command(['xclip', '-selection', 'c', '-o'])
 	if dataclass.engine == "wl-clipboard":
 		if method == "set":
-			try:
-				return run_command(['wl-copy', text], timeout=7)
-			except exceptions.EngineTimeoutExpired:
-				return None # SEEMS like its okay, wl-copy for some reason remains in background
+			return run_command_with_paste(['wl-copy'], text)
 		if method == "get":
 			return run_command(['wl-paste'], features=("wl-clipboard_nothing_is_copied_is_ok",))
 	# - = - = - = - = - = - = - = - = - = -
