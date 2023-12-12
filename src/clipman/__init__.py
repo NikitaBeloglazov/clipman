@@ -20,9 +20,14 @@ import sys
 import time
 import shutil
 import platform
+import traceback
 import subprocess
 
 from . import exceptions
+
+def log(message):
+	if dataclass.debug == True:
+		print(message)
 
 def check_binary_installed(binary_name):
 	""" Checks if binary is avalible in this OS """
@@ -100,6 +105,7 @@ class DataClass():
 		self.os_name = detect_os()
 		self.engine = None
 		self.init_called = False
+		self.debug = False
 
 dataclass = DataClass()
 
@@ -124,7 +130,8 @@ def detect_clipboard_engine():
 			# If call to klipper do not raise errors, everything is OK
 			return 'org.kde.klipper'
 		except:
-			pass
+			log("klipper init failed:")
+			log(traceback.format_exc())
 
 		if graphical_backend == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
@@ -245,5 +252,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 
 def init():
 	""" Initializes clipman, and detects copy engine for work """
+	log("init call start")
 	dataclass.engine = detect_clipboard_engine()
+	log(f"detected engine: {dataclass.engine}")
 	dataclass.init_called = True
