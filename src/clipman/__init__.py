@@ -235,7 +235,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	# - = Android = - = - = - = - = - = - =
 	if dataclass.engine == "termux-clipboard":
 		if method == "set":
-			return run_command(['termux-clipboard-set', text])
+			return run_command_with_paste(['termux-clipboard-set'], text)
 		if method == "get":
 			return run_command(['termux-clipboard-get'])
 	# - = - = - = - = - = - = - = - = - = -
