@@ -20,9 +20,15 @@ import sys
 import time
 import shutil
 import platform
+import traceback
 import subprocess
 
 from . import exceptions
+
+def debug_print(message):
+	""" Prints debug messages if dataclass.debug is True :shrug: """
+	if dataclass.debug is True:
+		print(message)
 
 def check_binary_installed(binary_name):
 	""" Checks if binary is avalible in this OS """
@@ -38,19 +44,33 @@ def detect_os():
 
 	if os_name == "Darwin" and os.path.exists("/Users") and os.path.isdir("/Users"):
 		# Detect macOS by specific directories in root (/)
-		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too
+		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too ( UPD: Actually, no:) )
 		return "macOS"
 
 	return os_name
 
-def run_command(command, timeout=20):
+def run_command(command, timeout=7, features=(), tries_maked=1):
 	""" Binary file caller """
 	try:
 		runner = subprocess.run(command, timeout=timeout, shell=False, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.TimeoutExpired as e:
-		raise exceptions.EngineTimeoutExpired(f"The timeout for executing the command was exceeded: subprocess.TimeoutExpired: {e}")
+		if tries_maked > 3:
+			raise exceptions.EngineTimeoutExpired(f"Executing the command three times (retries), the timeout was exceeded: subprocess.TimeoutExpired: {e}")
+		debug_print(f"timeout exceeded. Retry, attempt {tries_maked}")
+
+		# Try again
+		return run_command(command, timeout, features, tries_maked=tries_maked+1)
 
 	if runner.returncode != 0:
+		# - = - = - = - = - = - = - = - = - = - = - = - = - =
+		# Workaround: if nothing is copied, wl-clipboard returns error code 1 with message "Nothing is copied"
+
+		# We catch these moments and return an empty string
+		# because by default in clipman, if there is nothing copied, we need to return an empty string
+		if "wl-clipboard_nothing_is_copied_is_ok" in features:
+			if runner.stderr.decode('UTF-8') == "Nothing is copied\n":
+				return ""
+		# - = - = - = - = - = - = - = - = - = - = - = - = - =
 		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stderr.decode('UTF-8')}")
 
 	return runner.stdout.decode("UTF-8").removesuffix("\n") # looks like all commands returns \n in the end
@@ -67,13 +87,13 @@ def run_command_with_paste(command, text):
 		#time.sleep(0.2)
 		#runner.kill()
 
-def check_run_command(command, engine):
+def check_run_command(command, engine, features=()):
 	"""
 	command - command to check run
 	engine - string that will be returned if check is succeful
 	"""
 	try:
-		run_command(command)
+		run_command(command, features=features)
 	except exceptions.EngineTimeoutExpired as e:
 		raise exceptions.EngineTimeoutExpired from e
 	except exceptions.ClipmanBaseException as e:
@@ -83,10 +103,15 @@ def check_run_command(command, engine):
 class DataClass():
 	""" Class for storing module data """
 	def __init__(self):
+		# - =
+		self.klipper = None
 		self.windows_native_backend = None
+		# - =
+
 		self.os_name = detect_os()
 		self.engine = None
 		self.init_called = False
+		self.debug = False
 
 dataclass = DataClass()
 
@@ -102,6 +127,18 @@ def detect_clipboard_engine():
 		except KeyError:
 			graphical_backend = "< NOT SET >"
 
+		try:
+			import dbus # pylint: disable=import-outside-toplevel
+			bus = dbus.SessionBus()
+			dataclass.klipper = dbus.Interface(bus.get_object("org.kde.klipper", "/klipper"), "org.kde.klipper.klipper")
+			dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
+
+			# If call to klipper do not raise errors, everything is OK
+			return 'org.kde.klipper'
+		except:
+			debug_print("klipper init failed:")
+			debug_print(traceback.format_exc())
+
 		if graphical_backend == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
 				return check_run_command(['xsel', '-b', '-n', '-o'], "xsel")
@@ -111,7 +148,7 @@ def detect_clipboard_engine():
 
 		if graphical_backend == "wayland":
 			if check_binary_installed("wl-paste"):
-				return check_run_command(['wl-paste'], "wl-clipboard")
+				return check_run_command(['wl-paste'], "wl-clipboard", features=("wl-clipboard_nothing_is_copied_is_ok",))
 			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager.")
 
 		if graphical_backend == "tty":
@@ -175,6 +212,11 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	text = str(text)
 
 	# - = LINUX - = - = - = - = - = - = - =
+	if dataclass.engine == "org.kde.klipper":
+		if method == "set":
+			return dataclass.klipper.setClipboardContents(text, dbus_interface="org.kde.klipper.klipper")
+		if method == "get":
+			return str(dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper"))
 	if dataclass.engine == "xsel":
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)
@@ -187,17 +229,14 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			return run_command(['xclip', '-selection', 'c', '-o'])
 	if dataclass.engine == "wl-clipboard":
 		if method == "set":
-			try:
-				return run_command(['wl-copy', text], timeout=7)
-			except exceptions.EngineTimeoutExpired:
-				return None # SEEMS like its okay, wl-copy for some reason remains in background
+			return run_command_with_paste(['wl-copy'], text)
 		if method == "get":
-			return run_command(['wl-paste'])
+			return run_command(['wl-paste'], features=("wl-clipboard_nothing_is_copied_is_ok",))
 	# - = - = - = - = - = - = - = - = - = -
 	# - = Android = - = - = - = - = - = - =
 	if dataclass.engine == "termux-clipboard":
 		if method == "set":
-			return run_command(['termux-clipboard-set', text])
+			return run_command_with_paste(['termux-clipboard-set'], text)
 		if method == "get":
 			return run_command(['termux-clipboard-get'])
 	# - = - = - = - = - = - = - = - = - = -
@@ -217,7 +256,10 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	# - = - = - = - = - = - = - = - = - = -
 	raise exceptions.UnknownError("Specified engine not found. Have you set it manually?? ]:<")
 
-def init():
+def init(debug=False):
 	""" Initializes clipman, and detects copy engine for work """
+	dataclass.debug = debug
+	debug_print("init call start")
 	dataclass.engine = detect_clipboard_engine()
+	debug_print(f"detected engine: {dataclass.engine}")
 	dataclass.init_called = True
