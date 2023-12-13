@@ -25,7 +25,7 @@ import subprocess
 
 from . import exceptions
 
-def log(message):
+def debug_print(message):
 	if dataclass.debug == True:
 		print(message)
 
@@ -43,17 +43,22 @@ def detect_os():
 
 	if os_name == "Darwin" and os.path.exists("/Users") and os.path.isdir("/Users"):
 		# Detect macOS by specific directories in root (/)
-		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too
+		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too ( UPD: Actually, no:) )
 		return "macOS"
 
 	return os_name
 
-def run_command(command, timeout=20, features=()):
+def run_command(command, timeout=7, features=(), tries_maked=1):
 	""" Binary file caller """
 	try:
 		runner = subprocess.run(command, timeout=timeout, shell=False, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except subprocess.TimeoutExpired as e:
-		raise exceptions.EngineTimeoutExpired(f"The timeout for executing the command was exceeded: subprocess.TimeoutExpired: {e}")
+		if tries_maked > 3:
+			raise exceptions.EngineTimeoutExpired(f"Executing the command three times (retries), the timeout was exceeded: subprocess.TimeoutExpired: {e}")
+		debug_print(f"timeout exceeded. Retry, attempt {tries_maked}")
+
+		# Try again
+		return run_command(command, timeout, features, tries_maked=tries_maked+1)
 
 	if runner.returncode != 0:
 		# - = - = - = - = - = - = - = - = - = - = - = - = - =
@@ -130,8 +135,8 @@ def detect_clipboard_engine():
 			# If call to klipper do not raise errors, everything is OK
 			return 'org.kde.klipper'
 		except:
-			log("klipper init failed:")
-			log(traceback.format_exc())
+			debug_print("klipper init failed:")
+			debug_print(traceback.format_exc())
 
 		if graphical_backend == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
@@ -250,9 +255,10 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	# - = - = - = - = - = - = - = - = - = -
 	raise exceptions.UnknownError("Specified engine not found. Have you set it manually?? ]:<")
 
-def init():
+def init(debug=False):
 	""" Initializes clipman, and detects copy engine for work """
-	log("init call start")
+	dataclass.debug = debug
+	debug_print("init call start")
 	dataclass.engine = detect_clipboard_engine()
-	log(f"detected engine: {dataclass.engine}")
+	debug_print(f"detected engine: {dataclass.engine}")
 	dataclass.init_called = True
