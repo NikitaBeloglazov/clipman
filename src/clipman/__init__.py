@@ -26,7 +26,8 @@ import subprocess
 from . import exceptions
 
 def debug_print(message):
-	if dataclass.debug == True:
+	""" Prints debug messages if dataclass.debug is True :shrug: """
+	if dataclass.debug is True:
 		print(message)
 
 def check_binary_installed(binary_name):
