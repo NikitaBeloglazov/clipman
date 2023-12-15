@@ -157,10 +157,12 @@ def detect_clipboard_engine():
 				dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
 				return 'org.kde.klipper' # If call to klipper do not raise errors, everything is OK
 			except ImportError as e:
-				raise exceptions.AdditionalDependenciesRequired("Please install dbus-python package.\n - Via your system package manager. Possible package names: \"python3-dbus-python\" or \"python3-dbus\"\n - Or Via PIP: \"pip3 install dbus\"") from e
+				error_message = "Please install dbus-python package.\n - Via your system package manager. Possible package names: \"python3-dbus-python\" or \"python3-dbus\"\n - Or via PIP: \"pip3 install dbus\""
+				raise exceptions.AdditionalDependenciesRequired(error_message) from e
 			except Exception as e: # pylint: disable=broad-except
 				if dataclass.current_desktop in ("KDE", "PLASMA"):
-					raise exceptions.UnknownError("An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?") from e
+					error_message = "An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?"
+					raise exceptions.UnknownError(error_message) from e
 				debug_print("klipper init failed:")
 				debug_print(traceback.format_exc())
 
@@ -169,27 +171,33 @@ def detect_clipboard_engine():
 				return check_run_command(['xsel', '-b', '-n', '-o'], "xsel")
 			if check_binary_installed("xclip"):
 				return check_run_command(['xclip', '-selection', 'c', '-o'], "xclip")
-			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux X11, you need to install \"xsel\" or \"xclip\" via your system package manager.")
+			error_message = "Clipboard engines not found on your system. For Linux X11, you need to install \"xsel\" or \"xclip\" via your system package manager."
+			raise exceptions.NoEnginesFoundError(error_message)
 
 		if dataclass.display_server == "wayland":
 			if check_binary_installed("wl-paste"):
 				return check_run_command(['wl-paste'], "wl-clipboard", features=("wl-clipboard_nothing_is_copied_is_ok",))
-			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager.")
+			error_message = "Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager."
+			raise exceptions.NoEnginesFoundError(error_message)
 
 		if dataclass.display_server == "tty":
-			raise exceptions.UnsupportedError("Clipboard in TTY is unsupported.")
+			error_message = "Clipboard in TTY is unsupported."
+			raise exceptions.UnsupportedError(error_message)
 
 		# If display_server is unknown
-		raise exceptions.NoEnginesFoundError(f"The graphical backend (X11, Wayland) was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also note that TTY is unsupported.\n\nXDG_SESSION_TYPE content: {dataclass.display_server}")
+		error_message = f"The graphical backend (X11, Wayland) or running KDE was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also note that TTY is unsupported.\n\nXDG_SESSION_TYPE content: {dataclass.display_server}"
+		raise exceptions.NoEnginesFoundError(error_message)
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 	if dataclass.os_name == "Android":
 		if check_binary_installed("termux-clipboard-get"):
 			try:
 				return check_run_command(['termux-clipboard-get'], "termux-clipboard")
 			except exceptions.EngineTimeoutExpired as e:
-				raise exceptions.NoEnginesFoundError("No usable clipboard engines found on your system. \"termux-clipboard-get\" finished with timeout, so that means Termux:API plug-in is not installed. Please install it from F-Droid and try again.") from e
+				error_message = "No usable clipboard engines found on your system. \"termux-clipboard-get\" finished with timeout, so that means Termux:API plug-in is not installed. Please install it from F-Droid and try again."
+				raise exceptions.NoEnginesFoundError(error_message) from e
 		else:
-			raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid.")
+			error_message = "Clipboard engines not found on your system. For Android+Termux, you need to run \"pkg install termux-api\" and install \"Termux:API\" plug-in from F-Droid."
+			raise exceptions.NoEnginesFoundError(error_message)
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 	if dataclass.os_name == "Windows":
 		from . import windows # pylint: disable=C0415 # import-outside-toplevel
@@ -199,10 +207,12 @@ def detect_clipboard_engine():
 	if dataclass.os_name == "macOS":
 		if check_binary_installed("pbpaste"):
 			return check_run_command(['pbpaste'], "pboard")
-		raise exceptions.NoEnginesFoundError("Clipboard engines not found on your system. For some reason, pbpaste (pboard) is not included in your macOS:((\nPlease make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
+		error_message = "Clipboard engines not found on your system. For some reason, pbpaste (pboard) is not included in your macOS:((\nPlease make issue at https://github.com/NikitaBeloglazov/clipman/issues/new"
+		raise exceptions.NoEnginesFoundError(error_message)
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 
-	raise exceptions.UnsupportedError(f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" OS is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new")
+	error_message = f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" OS is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new"
+	raise exceptions.UnsupportedError(error_message)
 
 def get():
 	"""
@@ -232,7 +242,8 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	if dataclass.init_called is False:
 		raise exceptions.NoInitializationError
 	if method == "set" and text is None:
-		raise exceptions.TextNotSpecified("Not specified text to paste!")
+		error_message = "Not specified text to paste!"
+		raise exceptions.TextNotSpecified(error_message)
 
 	text = str(text)
 
@@ -279,7 +290,8 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 		if method == "get":
 			return run_command(['pbpaste'])
 	# - = - = - = - = - = - = - = - = - = -
-	raise exceptions.UnknownError("Specified engine not found. Have you set it manually?? ]:<")
+	error_message = "Specified engine not found. Have you set it manually?? ]:<"
+	raise exceptions.UnknownError(error_message)
 
 def init(debug=False):
 	""" Initializes clipman, and detects copy engine for work """
