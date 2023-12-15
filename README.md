@@ -51,8 +51,9 @@ except clipman.exceptions.ClipmanBaseException as e:
 pip3 install clipman
 ```
 
-# Support
-__•‎ 🟩 Linux - FULL SUPPORT__, some additional deps needed
+# 🔌 Support
+__•‎ 🟩 Linux - FULL SUPPORT, native in KDE__.
+In other cases, some additional dependencies are required
 
 __•‎ 🟩 Android - FULL SUPPORT in Termux__, some additional deps needed too
 
@@ -66,6 +67,13 @@ __•‎ 🟩 MacOS - Works__ on macOS HighSierra 10.13
 __Unstead zypper you need to use system package manager: pkg, apt, dnf, pacman, etc__
 
 `- = - = -`
+### 🐧 On Linux/BSD - ▶️ KDE (any display server)
+
+- Native support. No additional dependencies are needed.
+
+It seems that all dependencies are listed below are already installed by default in all KDE distributions
+###### The only minimum requirement is dbus, klipper (which is now built-in into KDE), and an `dbus-python`
+
 ### 🐧 On Linux/BSD - X11
 - Install `xsel` or `xclip` package
 
@@ -94,5 +102,5 @@ The module is specially written so that errors give you a complete answer even i
 
 * 🥼 __Pull requests are welcome!__
 * 🌈 Feel free to write Issues! The developer can answer you in the following languages: Ukrainian, English, Russian.
-* Don't forget to attach version (`pip3 show clipman`) and error text :)
+* Don't forget to attach version (`pip3 show clipman`) and error text with `clipman.init(debug=True)` :)
 * ⏩ To speed up the process write to [maintainer](https://github.com/NikitaBeloglazov)

@@ -43,8 +43,12 @@ class UnsupportedError(ClipmanBaseException):
 class TextNotSpecified(ClipmanBaseException):
 	""" Called if call("copy") not specified text to paste """
 
+# - = - = -
 class NoEnginesFoundError(ClipmanBaseException):
 	""" If usable clipboard engines not found on target OS """
+class AdditionalDependenciesRequired(ClipmanBaseException):
+    """ If additional dependencies are required for target OS """
+# - = - = -
 
 class EngineError(ClipmanBaseException):
 	""" If there is an error raised by clipboard engine """
@@ -53,4 +57,4 @@ class EngineTimeoutExpired(ClipmanBaseException):
 	""" Called if clipboard engine calling times out. Mostly made for termux-clipboard-get """
 
 class UnknownError(ClipmanBaseException):
-	""" No comments """
+	""" Unknown Error """
