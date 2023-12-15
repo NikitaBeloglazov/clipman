@@ -63,7 +63,7 @@ def run_command(command, timeout=7, features=(), tries_maked=1):
 
 	if runner.returncode != 0:
 		# - = - = - = - = - = - = - = - = - = - = - = - = - =
-		# Workaround: if nothing is copied, wl-clipboard returns error code 1 with message "Nothing is copied"
+		# Workaround: if nothing is copied, wl-clipboard returns error code 1 with the message "Nothing is copied"
 
 		# We catch these moments and return an empty string
 		# because by default in clipman, if there is nothing copied, we need to return an empty string
@@ -90,7 +90,7 @@ def run_command_with_paste(command, text):
 def check_run_command(command, engine, features=()):
 	"""
 	command - command to check run
-	engine - string that will be returned if check is succeful
+	engine - string that will be returned if the check is successful
 	"""
 	try:
 		run_command(command, features=features)
@@ -185,7 +185,7 @@ def detect_clipboard_engine():
 			raise exceptions.UnsupportedError(error_message)
 
 		# If display_server is unknown
-		error_message = f"The graphical backend (X11, Wayland) or running KDE was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also note that TTY is unsupported.\n\nXDG_SESSION_TYPE content: {dataclass.display_server}"
+		error_message = f"The graphical backend (X11, Wayland) or running KDE was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also, please note that TTY is unsupported.\n\nXDG_SESSION_TYPE content: {dataclass.display_server}"
 		raise exceptions.NoEnginesFoundError(error_message)
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 	if dataclass.os_name == "Android":
@@ -211,13 +211,13 @@ def detect_clipboard_engine():
 		raise exceptions.NoEnginesFoundError(error_message)
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 
-	error_message = f"Clipboard engines not found on your system. Seems like \"{dataclass.os_name}\" OS is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new"
+	error_message = f"Clipboard engines not found on your system. Looks like \"{dataclass.os_name}\" OS is unsupported. Please make issue at https://github.com/NikitaBeloglazov/clipman/issues/new"
 	raise exceptions.UnsupportedError(error_message)
 
 def get():
 	"""
-	Gets & returns clipboard content as DECODED string.
-	If there is a picture or copied file(in windows), it returns empty string
+	Gets & returns the clipboard content as DECODED string.
+	If there is a picture or copied file (in windows), it returns an empty string
 	"""
 	return call("get")
 
