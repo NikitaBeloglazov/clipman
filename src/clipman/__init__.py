@@ -31,7 +31,7 @@ def debug_print(message):
 		print(message)
 
 def check_binary_installed(binary_name):
-	""" Checks if binary is avalible in this OS """
+	""" Checks if binary is available in this OS """
 	return shutil.which(binary_name) is not None
 
 def detect_os():
