@@ -149,6 +149,10 @@ def detect_clipboard_engine():
 		debug_print("display_server: " + dataclass.display_server)
 		debug_print("current_desktop: "+ dataclass.current_desktop)
 
+		if dataclass.display_server == "tty":
+			error_message = "Clipboard in TTY is unsupported."
+			raise exceptions.UnsupportedError(error_message)
+
 		if check_binary_installed("klipper"):
 			try:
 				import dbus # pylint: disable=import-outside-toplevel
@@ -179,10 +183,6 @@ def detect_clipboard_engine():
 				return check_run_command(['wl-paste'], "wl-clipboard", features=("wl-clipboard_nothing_is_copied_is_ok",))
 			error_message = "Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager."
 			raise exceptions.NoEnginesFoundError(error_message)
-
-		if dataclass.display_server == "tty":
-			error_message = "Clipboard in TTY is unsupported."
-			raise exceptions.UnsupportedError(error_message)
 
 		# If display_server is unknown
 		error_message = f"The graphical backend (X11, Wayland) or running KDE was not found on your Linux OS. Check XDG_SESSION_TYPE variable in your ENV. Also, please note that TTY is unsupported.\n\nXDG_SESSION_TYPE content: {dataclass.display_server}"
