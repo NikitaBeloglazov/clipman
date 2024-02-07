@@ -95,6 +95,8 @@ And you need install additional deps in it.
 
 # License
 This code is under [Mozilla Public License Version 2.0](/../../blob/main/LICENSE).
+The `clipman.windows` module also contains code derived from pyperclip that is
+licensed under the [BSD 3-Clause License](/../../blob/main/LICENSE.BSD-3-Clause).
 
 # Contribution / Issues
 📕 __[!!] If you encouter an error, please read the error text very closely.

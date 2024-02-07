@@ -16,6 +16,11 @@
  * along with NikitaBeloglazov/clipman
  * If not, see https://mozilla.org/en-US/MPL/2.0.
 
+ * This file also contains code derived from the pyerclip project which is
+ * licensed under the BSD 3-Clause License and
+ * Copyright (c) 2014, Al Sweigart.
+ * See LICENSE.BSD-3-Clause at the root of this repository for the full text.
+
 - = - =
  * Module Decsription:
  Module that is responsible for supporting OS Windows

@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Python3 module for working with clipboard. Created because pyperclip is discontinued."
 readme = "README.md"
-license = {text = "MPL 2.0 License"}
+license = {text = "MPL-2.0 AND BSD-3-Clause"}
 
 requires-python = ">=3.9"
 dependencies = []
