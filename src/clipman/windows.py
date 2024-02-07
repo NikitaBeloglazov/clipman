@@ -15,17 +15,22 @@
  * You should have received a copy of the Mozilla Public License 2.0
  * along with NikitaBeloglazov/clipman
  * If not, see https://mozilla.org/en-US/MPL/2.0.
-
 - = - =
+
  * Module Decsription:
  Module that is responsible for supporting OS Windows
 
 - = - =
 
-This piece of code was taken from Pypeclip and essentially rewritten to use classes normally,
-the old code was really terrible (function in a function? SERIOUSLY?!?!?!)
+Mostly, this code was assembled and rewriten from pieces of other code,
+that was taken from StackOverflow and INSPIRED from some pypeclip code.
 
-LINK: https://github.com/asweigart/pyperclip/blob/master/src/pyperclip/__init__.py#L350
+Some REFERENCE links
+- https://stackoverflow.com/questions/42320125/python-get-file-from-clipboard-with-winapi-through-dragqueryfile-returns-nothing
+- https://stackoverflow.com/questions/46132401/read-text-from-clipboard-in-windows-using-ctypes
+- https://gist.github.com/MAGANER/c80d1a026aa141df1dd57c8aafe55ebc
+- https://learn.microsoft.com/ru-ru/windows/win32/dataxchg/clipboard-functions
+- https://github.com/asweigart/pyperclip/blob/master/src/pyperclip/__init__.py#L350 (terrible order of things)
 
 - = -
 
@@ -36,13 +41,15 @@ If problems arise, for example, with encoding, God and your own hands will help.
 Pull requests are always open. Amen. xD
 
 - = - =
- * Usage:
+
+ * Raw usage (not recommended)
 
  - from clipman import windows
  - win = windows.WindowsClipboard() # initialize it
 
  - win.paste() # returns text in clipboard
  - win.copy("test text") # puts text in clipboard
+
 """
 import contextlib
 import ctypes
@@ -122,9 +129,9 @@ class WindowsClipboard():
 	def window(self):
 		"""
 		Context that provides a valid Windows hwnd.
+		We really just need the hwnd, so setting "STATIC"
+		as predefined lpClass is just fine.
 		"""
-		# we really just need the hwnd, so setting "STATIC"
-		# as predefined lpClass is just fine.
 		hwnd = self.safeCreateWindowExA(0, b"STATIC", None, 0, 0, 0, 0, 0,
 								   None, None, None, None)
 		try:
@@ -137,10 +144,10 @@ class WindowsClipboard():
 		"""
 		Context manager that opens the clipboard and prevents
 		other applications from modifying the clipboard content.
+		We may not get the clipboard handle immediately because
+		some other application is accessing it (?)
+		We try for at least 500ms to get the clipboard.
 		"""
-		# We may not get the clipboard handle immediately because
-		# some other application is accessing it (?)
-		# We try for at least 500ms to get the clipboard.
 		t = time.time() + 0.5
 		success = False
 		while time.time() < t:
@@ -158,8 +165,7 @@ class WindowsClipboard():
 
 	def copy(self, text):
 		"""
-		This function is heavily based on
-		http://msdn.com/ms649016#_win32_Copying_Information_to_the_Clipboard
+		Reference: http://msdn.com/ms649016#_win32_Copying_Information_to_the_Clipboard
 		"""
 
 		text = str(text)
