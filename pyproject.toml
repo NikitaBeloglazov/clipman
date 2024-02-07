@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clipman"
-version = "!!{PLACEHOLDER}!!"
+version = "!!{PLACEHOLDER}!!" # PLEASE RUN tags_marker.py BEFORE PACKAGING
 authors = [
   {name="NikitaBeloglazov", email="nnikita.beloglazov@gmail.com"},
 ]
