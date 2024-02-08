@@ -14,21 +14,15 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  deploy:
-
+  build:
+    name: Build module
     runs-on: ubuntu-latest
-
-    environment:
-      name: pypi
-      url: https://pypi.org/p/clipman
-
-    steps:
-    - uses: actions/checkout@v3
+  steps:
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.x'
     - name: Install dependencies
@@ -39,5 +33,29 @@ jobs:
       run: python3 tags_marker.py
     - name: Build package
       run: python -m build
+    - name: Store the distribution packages
+      uses: actions/upload-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
+
+  deploy:
+    name: Publish module to PyPI
+    needs:
+    - build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/clipman
+
+    permissions:
+      id-token: write
+    
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: dist/
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
