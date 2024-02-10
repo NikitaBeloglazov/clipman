@@ -160,13 +160,13 @@ def detect_clipboard_engine():
 				dataclass.klipper = dbus.Interface(bus.get_object("org.kde.klipper", "/klipper"), "org.kde.klipper.klipper")
 				dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
 				return 'org.kde.klipper' # If call to klipper do not raise errors, everything is OK
-			except ImportError as e:
-				error_message = "Please install dbus-python package.\n - Via your system package manager. Possible package names: \"python3-dbus-python\" or \"python3-dbus\"\n - Or via PIP: \"pip3 install dbus\""
-				raise exceptions.AdditionalDependenciesRequired(error_message) from e
-			except Exception as e: # pylint: disable=broad-except
-				if dataclass.current_desktop in ("KDE", "PLASMA"):
-					error_message = "An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?"
-					raise exceptions.UnknownError(error_message) from e
+			#except ImportError as e:
+			#	error_message = "Please install dbus-python package.\n - Via your system package manager. Possible package names: \"python3-dbus-python\" or \"python3-dbus\"\n - Or via PIP: \"pip3 install dbus\""
+			#	raise exceptions.AdditionalDependenciesRequired(error_message) from e
+			except Exception:# as e: # pylint: disable=broad-except
+				#if dataclass.current_desktop in ("KDE", "PLASMA"):
+				#	error_message = "An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?"
+				#	raise exceptions.UnknownError(error_message) from e
 				debug_print("klipper init failed:")
 				debug_print(traceback.format_exc())
 
