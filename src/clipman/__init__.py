@@ -42,6 +42,10 @@ def detect_os():
 		# Detect Android by yourself because platform.system() detects Android as Linux
 		return "Android"
 
+	if os_name == "Linux" and os.uname().version.lower().find("microsoft") != -1:
+		# Detect WSL by yourself, looking at uname, because platform.system() detects WSL as Linux
+		return "WSL"
+
 	if os_name == "Darwin" and os.path.exists("/Users") and os.path.isdir("/Users"):
 		# Detect macOS by specific directories in root (/)
 		# by yourself because platform.system() detects macOS as Darwin, and BSD is Darwin too ( UPD: Actually, no:) )
@@ -203,6 +207,15 @@ def detect_clipboard_engine():
 		from . import windows # pylint: disable=C0415 # import-outside-toplevel
 		dataclass.windows_native_backend = windows.WindowsClipboard()
 		return "windows_native_backend"
+	if dataclass.os_name == "WSL":
+		error_message = " file was not found. C: drive is mounted to /mnt/c/?"
+		if not os.path.isfile("/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe"):
+			raise exceptions.UnknownError("/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe" + error_message + " And you have PowerShell installed in your Windows?")
+		if not os.path.isfile("/mnt/c/Windows/System32/clip.exe"):
+			raise exceptions.UnknownError("/mnt/c/Windows/System32/clip.exe" + error_message)
+		if not os.path.isfile("/mnt/c/Windows/System32/chcp.com"):
+			raise exceptions.UnknownError("/mnt/c/Windows/System32/chcp.com" + error_message)
+		return "wsl"
 	# - = - = - = - = - = - = - = - = - = - = - = - = - = - =
 	if dataclass.os_name == "macOS":
 		if check_binary_installed("pbpaste"):
@@ -269,6 +282,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 		if method == "get":
 			return run_command(['wl-paste'], features=("wl-clipboard_nothing_is_copied_is_ok",))
 	# - = - = - = - = - = - = - = - = - = -
+
 	# - = Android = - = - = - = - = - = - =
 	if dataclass.engine == "termux-clipboard":
 		if method == "set":
@@ -276,13 +290,33 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 		if method == "get":
 			return run_command(['termux-clipboard-get'])
 	# - = - = - = - = - = - = - = - = - = -
+
 	# - = Windows = - = - = - = - = - = - =
 	if dataclass.engine == "windows_native_backend":
 		if method == "set":
 			return dataclass.windows_native_backend.copy(text)
 		if method == "get":
 			return dataclass.windows_native_backend.paste()
+
+	if dataclass.engine == "wsl":
+		# Specifying full path because WSL don't have /mnt/c/Windows/System32/ in PATH
+		if method == "set":
+			return run_command_with_paste(['/mnt/c/Windows/System32/clip.exe'], text)
+		if method == "get":
+			# Using PowerShell is not very good because it
+			# resets the console font, so we use a special command chain to prevent it
+
+			# HUGE thanks to magiblot from GitHub: 
+			# https://github.com/microsoft/terminal/issues/280#issuecomment-1728298632
+
+			# Related issues:
+			# https://github.com/microsoft/terminal/issues/280
+			# https://github.com/hashicorp/vagrant/issues/10775
+			# and many other linked to it
+			run_command(['/mnt/c/Windows/System32/chcp.com', '437']) # Does not affects to unicode symbols
+			return run_command(['/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe', '-NoProfile', '-NoLogo', '-NonInteractive', '([Console]::OutputEncoding = [System.Text.Encoding]::UTF8) -and (Get-Clipboard -Raw | Write-Host -NoNewLine) | Out-Null'])
 	# - = - = - = - = - = - = - = - = - = -
+
 	# - = macOS = - = - = - = - = - = - =
 	if dataclass.engine == "pboard":
 		if method == "set":
