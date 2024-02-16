@@ -37,6 +37,9 @@ def check_binary_installed(binary_name):
 def detect_os():
 	""" Detects name of OS """
 	os_name = platform.system()
+	debug_print("OS family: " + os.name)
+	if hasattr(os, "uname"): # if uname exists
+		debug_print(os.uname())
 
 	if os_name == "Linux" and hasattr(sys, "getandroidapilevel"):
 		# Detect Android by yourself because platform.system() detects Android as Linux
@@ -114,7 +117,7 @@ class DataClass():
 		self.display_server = None
 		self.current_desktop = None
 
-		self.os_name = detect_os()
+		self.os_name = None
 		self.engine = None
 		self.init_called = False
 		self.debug = False
@@ -150,8 +153,8 @@ def detect_clipboard_engine():
 		dataclass.current_desktop = dataclass.current_desktop.upper()
 		# - = - = - = - = - = - =
 
-		debug_print("display_server: " + dataclass.display_server)
-		debug_print("current_desktop: "+ dataclass.current_desktop)
+		debug_print("Display server: " + dataclass.display_server)
+		debug_print("Current desktop: "+ dataclass.current_desktop)
 
 		if dataclass.display_server == "tty":
 			error_message = "Clipboard in TTY is unsupported."
@@ -330,7 +333,9 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 def init(debug=False):
 	""" Initializes clipman, and detects copy engine for work """
 	dataclass.debug = debug
-	debug_print("init call start")
+	debug_print("Init call start")
+	dataclass.os_name = detect_os()
+	debug_print("Detected OS: " + dataclass.os_name)
 	dataclass.engine = detect_clipboard_engine()
-	debug_print(f"detected engine: {dataclass.engine}")
+	debug_print(f"Detected engine: {dataclass.engine}")
 	dataclass.init_called = True
