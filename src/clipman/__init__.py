@@ -149,8 +149,8 @@ def detect_clipboard_engine():
 		dataclass.current_desktop = dataclass.current_desktop.upper()
 		# - = - = - = - = - = - =
 
-		debug_print("display_server: " + dataclass.display_server)
-		debug_print("current_desktop: "+ dataclass.current_desktop)
+		debug_print("Display server: " + dataclass.display_server)
+		debug_print("Current desktop: "+ dataclass.current_desktop)
 
 		if dataclass.display_server == "tty":
 			error_message = "Clipboard in TTY is unsupported."
