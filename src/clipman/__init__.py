@@ -45,7 +45,7 @@ def detect_os():
 		# Detect Android by yourself because platform.system() detects Android as Linux
 		return "Android"
 
-	if os_name == "Linux" and os.uname().version.lower().find("microsoft") != -1:
+	if os_name == "Linux" and (os.uname().release.lower().find("microsoft") != -1 or os.uname().version.lower().find("microsoft") != -1):
 		# Detect WSL by yourself, looking at uname, because platform.system() detects WSL as Linux
 		return "WSL"
 
