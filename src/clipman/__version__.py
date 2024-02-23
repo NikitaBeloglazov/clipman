@@ -1,7 +1,15 @@
 """
 Created for storing version number.
-The version number will be placed here based on the tag in Github using the tags_marker.py script.
-
-Having "!!{PLACEHOLDER}!!" in final releases is NOT allowed.
 """
-__version__="!!{PLACEHOLDER}!!"
+
+# Dynamically determine __version__ from package metadata
+
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("clipman")
+except PackageNotFoundError:
+    # Fallback for when running from the source directory
+    __version__ = "0.0.0+unknown"
+
+__all__ = ("__version__",)

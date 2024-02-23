@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "clipman"
-version = "!!{PLACEHOLDER}!!" # PLEASE RUN tags_marker.py BEFORE PACKAGING
+dynamic = ["version"]
 authors = [
   {name="NikitaBeloglazov", email="nnikita.beloglazov@gmail.com"},
 ]
@@ -28,3 +28,5 @@ classifiers = [
 [project.urls]
 "Homepage" = "https://github.com/NikitaBeloglazov/clipman"
 "Bug Tracker" = "https://github.com/NikitaBeloglazov/clipman/issues"
+
+[tool.setuptools_scm]
