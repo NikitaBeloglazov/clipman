@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clipman"
-dynamic = ["version"]
+dynamic = ["version"] # setuptools_scm
 authors = [
   {name="NikitaBeloglazov", email="nnikita.beloglazov@gmail.com"},
 ]
@@ -30,3 +30,11 @@ classifiers = [
 "Bug Tracker" = "https://github.com/NikitaBeloglazov/clipman/issues"
 
 [tool.setuptools_scm]
+# DO NOT add numbers to version. I decide which version I need to post
+version_scheme = "release-branch-semver"
+
+# get only tag, 3.2.0, not an 3.2.0.dev17+g2868326.d20240223abcdefghijklmnopqrstuvwxyz
+git_describe_command = "git describe --tags main"
+
+# overwrites an fallback template
+version_file = "src/clipman/__version__.py"

@@ -1,15 +1,10 @@
 """
 Created for storing version number.
+The version number will be placed here based on the tag in Github using the setuptools_scm.
+This file must be overwritten
+
+Having 0.0.0 in final releases is NOT allowed.
+If you see this comment, setuptools_scm was not started
 """
-
-# Dynamically determine __version__ from package metadata
-
-from importlib.metadata import PackageNotFoundError, version
-
-try:
-    __version__ = version("clipman")
-except PackageNotFoundError:
-    # Fallback for when running from the source directory
-    __version__ = "0.0.0+unknown"
-
-__all__ = ("__version__",)
+__version__ = version = '0.0.0'
+__version_tuple__ = version_tuple = (0, 0, 0)
