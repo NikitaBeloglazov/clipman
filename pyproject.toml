@@ -34,7 +34,7 @@ classifiers = [
 version_scheme = "release-branch-semver"
 
 # get only tag, 3.2.0, not an 3.2.0.dev17+g2868326.d20240223abcdefghijklmnopqrstuvwxyz
-git_describe_command = "git describe --tags main"
+git_describe_command = "git describe --tags"
 
 # overwrites an fallback template
 version_file = "src/clipman/__version__.py"
