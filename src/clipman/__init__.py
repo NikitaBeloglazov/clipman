@@ -308,7 +308,7 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			# Using PowerShell is not very good because it
 			# resets the console font, so we use a special command chain to prevent it
 
-			# HUGE thanks to magiblot from GitHub: 
+			# HUGE thanks to magiblot from GitHub:
 			# https://github.com/microsoft/terminal/issues/280#issuecomment-1728298632
 
 			# Related issues:
