@@ -76,6 +76,9 @@ def run_command(command, timeout=7, features=(), tries_maked=1):
 		if "wl-clipboard_nothing_is_copied_is_ok" in features:
 			if runner.stderr.decode('UTF-8') == "Nothing is copied\n":
 				return ""
+		if "wl-clipboard_wrong_mimetype_is_ok" in features:
+			if "Clipboard content is not available as requested type" in runner.stderr.decode('UTF-8'):
+				return ""
 		# - = - = - = - = - = - = - = - = - = - = - = - = - =
 		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stderr.decode('UTF-8')}")
 
@@ -186,7 +189,8 @@ def detect_clipboard_engine():
 
 		if dataclass.display_server == "wayland":
 			if check_binary_installed("wl-paste"):
-				return check_run_command(['wl-paste'], "wl-clipboard", features=("wl-clipboard_nothing_is_copied_is_ok",))
+				return check_run_command(['wl-paste', '--type', "text/plain;charset=utf-8"], "wl-clipboard",
+							 features=("wl-clipboard_nothing_is_copied_is_ok", "wl-clipboard_wrong_mimetype_is_ok"))
 			error_message = "Clipboard engines not found on your system. For Linux Wayland, you need to install \"wl-clipboard\" via your system package manager."
 			raise exceptions.NoEnginesFoundError(error_message)
 
@@ -282,7 +286,8 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 		if method == "set":
 			return run_command_with_paste(['wl-copy'], text)
 		if method == "get":
-			return run_command(['wl-paste'], features=("wl-clipboard_nothing_is_copied_is_ok",))
+			return run_command(['wl-paste', '--type', "text/plain;charset=utf-8"],
+					  features=("wl-clipboard_nothing_is_copied_is_ok", "wl-clipboard_wrong_mimetype_is_ok"))
 	# - = - = - = - = - = - = - = - = - = -
 
 	# - = Android = - = - = - = - = - = - =
