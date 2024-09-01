@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
- * Copyright (C) 2023 Nikita Beloglazov <nnikita.beloglazov@gmail.com>
+ * Copyright (C) 2023-2024 Nikita Beloglazov <nnikita.beloglazov@gmail.com>
  *
  * This file is part of github.com/NikitaBeloglazov/clipman.
  *
