@@ -113,7 +113,7 @@ class DataClass():
 	""" Class for storing module data """
 	def __init__(self):
 		# - =
-		self.klipper = None
+		self.kde_dbus_backend = None
 		self.windows_native_backend = None
 		# - =
 		self.display_server = None
@@ -154,30 +154,29 @@ def detect_clipboard_engine():
 
 		dataclass.current_desktop = dataclass.current_desktop.upper()
 		# - = - = - = - = - = - =
-
 		debug_print("Display server: " + dataclass.display_server)
 		debug_print("Current desktop: "+ dataclass.current_desktop)
+		if "KDE_SESSION_VERSION" in os.environ:
+			debug_print("KDE_SESSION_VERSION: "+ os.environ["KDE_SESSION_VERSION"])
+		# - = - = - = - = - = - =
 
 		if dataclass.display_server == "tty":
 			error_message = "Clipboard in TTY is unsupported."
 			raise exceptions.UnsupportedError(error_message)
 
-		if check_binary_installed("klipper"):
+		if dataclass.current_desktop in ("KDE", "PLASMA"):
 			try:
-				import dbus # pylint: disable=import-outside-toplevel
-				bus = dbus.SessionBus()
-				dataclass.klipper = dbus.Interface(bus.get_object("org.kde.klipper", "/klipper"), "org.kde.klipper.klipper")
-				dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper")
+				from . import kde # pylint: disable=import-outside-toplevel
+				dataclass.kde_dbus_backend = kde
+				dataclass.kde_dbus_backend.get_clipboard()
 				return 'org.kde.klipper' # If call to klipper do not raise errors, everything is OK
-			#except ImportError as e:
-			#	error_message = "Please install dbus-python package.\n - Via your system package manager. Possible package names: \"python3-dbus-python\" or \"python3-dbus\"\n - Or via PIP: \"pip3 install dbus\""
-			#	raise exceptions.AdditionalDependenciesRequired(error_message) from e
-			except Exception:# as e: # pylint: disable=broad-except
-				#if dataclass.current_desktop in ("KDE", "PLASMA"):
-				#	error_message = "An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?"
-				#	raise exceptions.UnknownError(error_message) from e
-				debug_print("klipper init failed:")
-				debug_print(traceback.format_exc())
+			except exceptions.AdditionalDependenciesRequired as e:
+				raise exceptions.AdditionalDependenciesRequired("[!] See error above") from e
+			except Exception as e: # pylint: disable=broad-except
+				error_message = "An unknown error raised while initializing klipper connection via dbus.\n[!] See error above. Make issue at https://github.com/NikitaBeloglazov/clipman/issues/new?"
+				raise exceptions.UnknownError(error_message) from e
+				#debug_print("klipper init failed:")
+				#debug_print(traceback.format_exc())
 
 		if dataclass.display_server == "x11":
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
@@ -269,9 +268,9 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 	# - = LINUX - = - = - = - = - = - = - =
 	if dataclass.engine == "org.kde.klipper":
 		if method == "set":
-			return dataclass.klipper.setClipboardContents(text, dbus_interface="org.kde.klipper.klipper")
+			return dataclass.kde_dbus_backend.set_clipboard(text)
 		if method == "get":
-			return str(dataclass.klipper.getClipboardContents(dbus_interface="org.kde.klipper.klipper"))
+			return dataclass.kde_dbus_backend.get_clipboard()
 	if dataclass.engine == "xsel":
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)

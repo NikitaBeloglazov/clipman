@@ -13,7 +13,7 @@ readme = "README.md"
 license = {text = "MPL 2.0 License"}
 
 requires-python = ">=3.9"
-dependencies = []
+dependencies = ["dbus_next"] # for KDE
 
 keywords = ["clipman", "clipboard", "copy", "paste", "xclip"]
 
