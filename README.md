@@ -71,9 +71,11 @@ __Unstead zypper you need to use system package manager: pkg, apt, dnf, pacman, 
 
 - Native support. No additional dependencies are needed.
 
-It seems that all dependencies are listed below are already installed by default in all KDE distributions
-###### The only minimum requirement is dbus, klipper (which is now built-in into KDE), and an `dbus-python`
+The only minimum requirement is dbus, and an `dbus-next` module, which will install with clipman as dependency
 
+KDE Plasma 5 and [KDE Plasma 6](https://kde.org/announcements/megarelease/6/) is supported
+
+`- = - = -`
 ### 🐧 On Linux/BSD - X11
 - Install `xsel` or `xclip` package
 
