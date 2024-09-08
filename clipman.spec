@@ -67,5 +67,7 @@ echo "DEBUG - INSTALL RUNNING"
 %files %{python_files}
 %{python_sitelib}/clipman
 %{python_sitelib}/clipman-%{version}.dist-info
+%license LICENSE
+%doc README.md
 
 %changelog
