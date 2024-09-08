@@ -1,0 +1,18 @@
+<!-- Just copy of _service file from OBS -->
+<!-- https://build.opensuse.org/projects/home:NikitaBeloglazov/packages/clipman/files/_service?expand=1 -->
+<services>
+  <service name="tar_scm">
+    <param name="url">https://github.com/NikitaBeloglazov/clipman</param>
+    <param name="scm">git</param>
+    <param name="revision">main</param>
+    <param name="filename">clipman</param>
+    <param name="versionformat">@PARENT_TAG@</param>
+    <param name="versionrewrite-pattern">v(.*)</param>
+    <param name="package-meta">yes</param>
+  </service>
+  <service name="extract_file">
+    <param name="archive">*.tar</param>
+    <param name="files">*/*.spec</param>
+  </service>
+  <service name="set_version"/>
+</services>
