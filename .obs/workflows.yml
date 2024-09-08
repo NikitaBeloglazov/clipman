@@ -1,0 +1,7 @@
+rebuild_master:
+  steps:
+    - trigger_services:
+        project: home:NikitaBeloglazov
+        package: clipman
+  filters:
+    event: tag_push
