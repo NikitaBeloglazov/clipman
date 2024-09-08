@@ -33,16 +33,16 @@ BuildRequires:  %{python_module setuptools}
 BuildRequires:  %{python_module setuptools_scm}
 BuildRequires:  %{python_module pip}
 BuildRequires:  fdupes
-BuildRequires:  git
 
 Requires:       python
-Requires:       python-requests
-Requires:       python-tqdm
-Requires:       python-urwid
-Requires:       python-clipman
-Requires:       python-ffmpeg-python
-Requires:       ffmpeg
-Requires:       python-yt-dlp
+
+# - = KDE
+Requires:       python-dbus_next
+# - = X11
+Requires:       xsel
+Recommends:     xclip
+# - = Wayland
+Requires:       wl-clipboard
 
 BuildArch:      noarch
 %python_subpackages
