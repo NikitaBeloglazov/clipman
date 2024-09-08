@@ -62,12 +62,10 @@ export SETUPTOOLS_SCM_PRETEND_VERSION="v%{version}"
 %install
 echo "DEBUG - INSTALL RUNNING"
 %pyproject_install
-# %python_clone -a %{buildroot}%{_bindir}/clipman # use this when easy start file will be arrived
 %python_expand %fdupes %{buildroot}%{$python_sitelib}
 
 %files %{python_files}
 %{python_sitelib}/clipman
 %{python_sitelib}/clipman-%{version}.dist-info
-# %python_alternative %{_bindir}/clipman # use this when easy start file will be arrived
 
 %changelog
