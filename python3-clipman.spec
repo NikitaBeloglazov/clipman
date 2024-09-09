@@ -52,7 +52,7 @@ Python 3 module for working with clipboard. Created because pyperclip is discont
 
 %prep
 echo "DEBUG - PREP RUNNING"
-%autosetup -p1 -n clipman-%{version}
+%autosetup -p1 -n python3-clipman-%{version}
 
 %build
 echo "DEBUG - BUILD RUNNING"
