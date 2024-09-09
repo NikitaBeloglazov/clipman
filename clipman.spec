@@ -20,7 +20,7 @@
 #  * - = - = - =
 
 %{?!python_module:%define python_module() python-%{**} python3-%{**}}
-Name:           clipman
+Name:           clipman-python3
 # Version sets dynamically by _service
 Version:        0.0.0
 Release:        0
