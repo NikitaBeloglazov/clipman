@@ -79,6 +79,9 @@ def run_command(command, timeout=7, features=(), tries_maked=1):
 		if "wl-clipboard_wrong_mimetype_is_ok" in features:
 			if "Clipboard content is not available as requested type" in runner.stderr.decode('UTF-8'):
 				return ""
+		if "xclip_target_STRING_not_available_is_ok" in features:
+			if runner.stderr.decode('UTF-8') == "Error: target STRING not available\n":
+				return ""
 		# - = - = - = - = - = - = - = - = - = - = - = - = - =
 		raise exceptions.EngineError(f"Command returned non-zero exit status: {str(runner.returncode)}.\n- = -\nSTDERR: {runner.stderr.decode('UTF-8')}")
 
@@ -182,7 +185,8 @@ def detect_clipboard_engine():
 			if check_binary_installed("xsel"): # Preffer xsel because is it less laggy and more fresh
 				return check_run_command(['xsel', '-b', '-n', '-o'], "xsel")
 			if check_binary_installed("xclip"):
-				return check_run_command(['xclip', '-selection', 'c', '-o'], "xclip")
+				return check_run_command(['xclip', '-selection', 'c', '-o'], "xclip",
+							 features=("xclip_target_STRING_not_available_is_ok", ))
 			error_message = "Clipboard engines not found on your system. For Linux X11, you need to install \"xsel\" or \"xclip\" via your system package manager."
 			raise exceptions.NoEnginesFoundError(error_message)
 
@@ -271,16 +275,20 @@ def call(method, text=None): # pylint: disable=R0911 # too-many-return-statement
 			return dataclass.kde_dbus_backend.set_clipboard(text)
 		if method == "get":
 			return dataclass.kde_dbus_backend.get_clipboard()
+
 	if dataclass.engine == "xsel":
 		if method == "set":
 			return run_command_with_paste(['xsel', '-b', '-i'], text)
 		if method == "get":
 			return run_command(['xsel', '-b', '-n', '-o'])
+
 	if dataclass.engine == "xclip":
 		if method == "set":
 			return run_command_with_paste(['xclip', '-selection', 'c', '-i'], text)
 		if method == "get":
-			return run_command(['xclip', '-selection', 'c', '-o'])
+			return run_command(['xclip', '-selection', 'c', '-o'],
+					  features=("xclip_target_STRING_not_available_is_ok", ))
+
 	if dataclass.engine == "wl-clipboard":
 		if method == "set":
 			return run_command_with_paste(['wl-copy'], text)
